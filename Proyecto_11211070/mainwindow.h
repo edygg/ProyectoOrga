@@ -6,6 +6,7 @@
 #include <QMenu>
 #include <QMenuBar>
 #include <QVBoxLayout>
+#include <QMessageBox>
 
 /* Constants */
 const QString PROGRAM_NAME = "Edilson Fernando Gonzalez";
@@ -42,6 +43,8 @@ class MainWindow : public QMainWindow
     /* Utilities menu actions */
     QAction* export_xml;
     QAction* import_xml;
+    QAction* export_json;
+    QAction* import_json;
 
     /* init methods */
     void init_components();
@@ -49,6 +52,25 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent = 0);
     ~MainWindow();
+
+public slots:
+    /* File menu slots */
+    void newFile();
+    void openFile();
+    void saveFile();
+    void printFile();
+    void closeFile();
+
+    /* Field menu slots */
+    void createField();
+    void changeField();
+    void listFields();
+
+    /* Record menu slots */
+    void insertRecord();
+    void searchRecord();
+    void deleteRecord();
+    void listRecods();
 };
 
 #endif // MAINWINDOW_H

@@ -46,6 +46,8 @@ void MainWindow::init_components() {
     QMenu* utilities_menu = menuBar()->addMenu("Utilities");
     utilities_menu->addAction(this->export_xml);
     utilities_menu->addAction(this->import_xml);
+    utilities_menu->addAction(this->export_json);
+    utilities_menu->addAction(this->import_json);
 
     this->setMinimumSize(500, 500);
     this->setWindowTitle(PROGRAM_NAME);
@@ -58,30 +60,35 @@ void MainWindow::init_actions() {
     this->new_file->setStatusTip("Create a new database");
     this->new_file->setToolTip("Create a new database");
     this->new_file->setCheckable(false);
+    connect(this->new_file, SIGNAL(triggered()), this, SLOT(newFile()));
 
     this->open_file = new QAction("Open File", this);
     this->open_file->setShortcut(Qt::CTRL + Qt::Key_O);
     this->open_file->setStatusTip("Open an exist database");
     this->open_file->setToolTip("Open an exist database");
     this->open_file->setCheckable(false);
+    connect(this->open_file, SIGNAL(triggered()), this, SLOT(openFile()));
 
     this->save_file = new QAction("Save File", this);
     this->save_file->setShortcut(Qt::CTRL + Qt::Key_S);
     this->save_file->setStatusTip("Save changes in the current database");
     this->save_file->setToolTip("Save changes in the current database");
     this->save_file->setCheckable(false);
+    connect(this->save_file, SIGNAL(triggered()), this, SLOT(saveFile()));
 
     this->print_file = new QAction("Print File", this);
     this->print_file->setShortcut(Qt::CTRL + Qt::Key_P);
     this->print_file->setStatusTip("Print the content of file");
     this->print_file->setToolTip("Print the content of file");
     this->print_file->setCheckable(false);
+    connect(this->print_file, SIGNAL(triggered()), this, SLOT(printFile()));
 
     this->close_file = new QAction("Close File", this);
     this->close_file->setShortcut(Qt::CTRL + Qt::Key_C);
     this->close_file->setStatusTip("Close the current database");
     this->close_file->setToolTip("Close the current database");
     this->close_file->setCheckable(false);
+    connect(this->close_file, SIGNAL(triggered()), this, SLOT(closeFile()));
 
     this->quit_program = new QAction("Quit", this);
     this->quit_program->setShortcut(Qt::ALT + Qt::Key_F4);
@@ -95,37 +102,44 @@ void MainWindow::init_actions() {
     this->create_field->setStatusTip("Create a new field");
     this->create_field->setToolTip("Create a new field");
     this->create_field->setCheckable(false);
+    connect(this->create_field, SIGNAL(triggered()), this, SLOT(createField()));
 
     this->change_field = new QAction("Change", this);
     this->change_field->setStatusTip("Change a exist field");
     this->change_field->setToolTip("Change a exist field");
     this->change_field->setCheckable(false);
+    connect(this->change_field, SIGNAL(triggered()), this, SLOT(changeField()));
 
     this->list_fields = new QAction("List", this);
     this->list_fields->setStatusTip("List all fields");
     this->list_fields->setToolTip("List all fields");
     this->list_fields->setCheckable(false);
+    connect(this->list_fields, SIGNAL(triggered()), this, SLOT(listFields()));
 
     /* Record menu actions */
     this->insert_record = new QAction("Insert", this);
     this->insert_record->setStatusTip("Insert a new record");
     this->insert_record->setToolTip("Insert a new record");
     this->insert_record->setCheckable(false);
+    connect(this->insert_record, SIGNAL(triggered()), this, SLOT(insertRecord()));
 
     this->search_record = new QAction("Search", this);
     this->search_record->setStatusTip("Search a record");
     this->search_record->setToolTip("Search a record");
     this->search_record->setCheckable(false);
+    connect(this->search_record, SIGNAL(triggered()), this, SLOT(searchRecord()));
 
     this->delete_record = new QAction("Delete", this);
     this->delete_record->setStatusTip("Delete a record");
     this->delete_record->setToolTip("Delete a record");
     this->delete_record->setCheckable(false);
+    connect(this->delete_record, SIGNAL(triggered()), this, SLOT(deleteRecord()));
 
     this->list_records = new QAction("List", this);
     this->list_records->setStatusTip("List all records");
     this->list_records->setToolTip("Search all records");
     this->list_records->setCheckable(false);
+    connect(this->list_records, SIGNAL(triggered()), this, SLOT(listRecods()));
 
     /* Indexes menu */
     this->create_simple_index = new QAction("Create Simple Index", this);
@@ -153,4 +167,62 @@ void MainWindow::init_actions() {
     this->import_xml->setStatusTip("Import data intro XML file");
     this->import_xml->setToolTip("Import data intro XML file");
     this->import_xml->setCheckable(false);
+
+    this->export_json = new QAction("Export to JSON", this);
+    this->export_json->setStatusTip("Export current database intro JSON file");
+    this->export_json->setToolTip("Export current database intro JSON file");
+    this->export_json->setCheckable(false);
+
+    this->import_json = new QAction("Import to JSON", this);
+    this->import_json->setStatusTip("Import data intro JSON file");
+    this->import_json->setToolTip("Import data intro JSON file");
+    this->import_json->setCheckable(false);
+}
+
+void MainWindow::newFile() {
+
+}
+
+void MainWindow::openFile() {
+
+}
+
+void MainWindow::saveFile() {
+
+}
+
+void MainWindow::printFile() {
+
+}
+
+void MainWindow::closeFile() {
+
+}
+
+void MainWindow::createField() {
+
+}
+
+void MainWindow::changeField() {
+
+}
+
+void MainWindow::listFields() {
+
+}
+
+void MainWindow::insertRecord() {
+
+}
+
+void MainWindow::searchRecord() {
+
+}
+
+void MainWindow::deleteRecord() {
+
+}
+
+void MainWindow::listRecods() {
+
 }
