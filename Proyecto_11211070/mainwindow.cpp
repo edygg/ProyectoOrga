@@ -35,6 +35,7 @@ void MainWindow::init_components() {
     record_menu->addAction(this->search_record);
     record_menu->addAction(this->delete_record);
     record_menu->addAction(this->list_records);
+    record_menu->addAction(this->cross_tables);
 
     /* Indexes menu */
     QMenu* indexes_menu = menuBar()->addMenu("Indexes");
@@ -48,6 +49,11 @@ void MainWindow::init_components() {
     utilities_menu->addAction(this->import_xml);
     utilities_menu->addAction(this->export_json);
     utilities_menu->addAction(this->import_json);
+
+    QLabel* main_status_bar = new QLabel();
+    main_status_bar->setAlignment(Qt::AlignHCenter);
+    main_status_bar->setMinimumSize(main_status_bar->sizeHint());
+    this->statusBar()->addWidget(main_status_bar);
 
     this->setMinimumSize(500, 500);
     this->setWindowTitle(PROGRAM_NAME);
@@ -141,6 +147,11 @@ void MainWindow::init_actions() {
     this->list_records->setCheckable(false);
     connect(this->list_records, SIGNAL(triggered()), this, SLOT(listRecods()));
 
+    this->cross_tables = new QAction("Cross", this);
+    this->cross_tables->setStatusTip("Cross tables");
+    this->cross_tables->setToolTip("Cross tables");
+    this->cross_tables->setCheckable(false);
+
     /* Indexes menu */
     this->create_simple_index = new QAction("Create Simple Index", this);
     this->create_simple_index->setStatusTip("Create Simple Index");
@@ -184,11 +195,11 @@ void MainWindow::newFile() {
 }
 
 void MainWindow::openFile() {
-
+    QString file_name = QFileDialog::getOpenFileName(this, "Open File", "", "Databases (*" + EXTENSION + ")");
 }
 
 void MainWindow::saveFile() {
-
+    QString file_name = QFileDialog::getSaveFileName(this, "Save File", "", "Databases (*" + EXTENSION + ")");
 }
 
 void MainWindow::printFile() {

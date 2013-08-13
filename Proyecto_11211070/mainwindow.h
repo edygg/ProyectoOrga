@@ -7,10 +7,14 @@
 #include <QMenuBar>
 #include <QVBoxLayout>
 #include <QMessageBox>
+#include <QLabel>
+#include <QStatusBar>
+#include <QFileDialog>
 
 /* Constants */
 const QString PROGRAM_NAME = "Edilson Fernando Gonzalez";
 const QString EXTENSION = ".edb";
+const QString TEMP_FILE = "temp_file" + EXTENSION;
 
 class MainWindow : public QMainWindow
 {
@@ -34,6 +38,7 @@ class MainWindow : public QMainWindow
     QAction* search_record;
     QAction* delete_record;
     QAction* list_records;
+    QAction* cross_tables;
 
     /* Indexes menu actions */
     QAction* create_simple_index;
