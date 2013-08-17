@@ -6,6 +6,7 @@
 #include <QMenu>
 #include <QMenuBar>
 #include <QVBoxLayout>
+#include <QHBoxLayout>
 #include <QMessageBox>
 #include <QLabel>
 #include <QStatusBar>
@@ -15,6 +16,9 @@
 #include <QFormLayout>
 #include <QLineEdit>
 #include <QComboBox>
+#include <QSpinBox>
+#include <QCheckBox>
+#include <QPushButton>
 
 #include "adtfile.h"
 #include "field.h"
@@ -71,6 +75,10 @@ class MainWindow : public QMainWindow
     QDialog* field_dialog;
     QLineEdit* le_name;
     QComboBox* cbox_datatype;
+    QSpinBox* sp_length;
+    QSpinBox* sp_decimal_places;
+    QCheckBox* chbox_key;
+
 
     /* init methods */
     void init_components();
@@ -98,6 +106,9 @@ public slots:
     void searchRecord();
     void deleteRecord();
     void listRecods();
+
+    /* Create Field Dialog */
+    void desactivateDecimalPlaces();
 };
 
 #endif // MAINWINDOW_H

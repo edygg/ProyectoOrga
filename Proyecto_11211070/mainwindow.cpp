@@ -192,22 +192,59 @@ void MainWindow::init_actions() {
 void MainWindow::init_field_dialog() {
     this->field_dialog = new QDialog(this);
     QFormLayout* layout = new QFormLayout(this->field_dialog);
+
     this->le_name = new QLineEdit(this->field_dialog);
-    this->le_name->maxLength(255);
+    this->le_name->setMaxLength(255);
+    QRegExp exp("[A-Za-z][A-Za-z0-9]*");
+    this->le_name->setValidator(new QRegExpValidator(exp, this->field_dialog));
     layout->addRow(new QLabel("Name"), this->le_name);
+
     QStringList cbox_options;
     cbox_options << "Integer" << "Real" << "String";
     this->cbox_datatype = new QComboBox(this->field_dialog);
     this->cbox_datatype->addItems(cbox_options);
+    connect(this->cbox_datatype, SIGNAL(currentIndexChanged(QString)), this, SLOT(desactivateDecimalPlaces()));
     layout->addRow(new QLabel("Data Type"), this->cbox_datatype);
+
+    this->sp_length = new QSpinBox(this->field_dialog);
+    this->sp_length->setMinimum(1);
+    this->sp_length->setMaximum(255);
+    layout->addRow(new QLabel("Length"), this->sp_length);
+
+    this->sp_decimal_places = new QSpinBox(this->field_dialog);
+    this->sp_decimal_places->setMinimum(0);
+    this->sp_decimal_places->setMaximum(255);
+    this->sp_decimal_places->setEnabled(false);
+    layout->addRow(new QLabel("Decimal Places"), this->sp_decimal_places);
+
+    this->chbox_key = new QCheckBox(this->field_dialog);
+    layout->addRow(new QLabel("Key"), this->chbox_key);
+
+    QPushButton* btn_cancel = new QPushButton("Cancel", this->field_dialog);
+    connect(btn_cancel, SIGNAL(clicked()), this->field_dialog, SLOT(close()));
+    QPushButton* btn_save_field = new QPushButton("Save", this->field_dialog);
+    layout->addWidget(btn_save_field);
+    layout->addWidget(btn_cancel);
+
+
 
     this->field_dialog->setLayout(layout);
 
     this->field_dialog->setWindowTitle("Create a new field");
     this->field_dialog->setModal(true);
-    this->field_dialog->showMaximized(false);
-    this->field_dialog->showMinimized(false);
+    this->field_dialog->setWindowFlags((windowFlags() | Qt::CustomizeWindowHint)
+                                       & ~Qt::WindowMaximizeButtonHint
+                                       & ~Qt::WindowContextHelpButtonHint
+                                       & ~Qt::WindowMinimizeButtonHint);
 
+}
+
+void MainWindow::desactivateDecimalPlaces() {
+    if (this->cbox_datatype->currentText() != "Real") {
+        this->sp_decimal_places->setEnabled(false);
+    } else {
+        this->sp_decimal_places->setEnabled(true);
+    }
 }
 
 void MainWindow::newFile() {
