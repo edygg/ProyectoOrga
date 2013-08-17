@@ -22,6 +22,7 @@
 
 #include "adtfile.h"
 #include "field.h"
+#include "adtrecordfile.h"
 
 #include <iostream>
 #include <string>
@@ -37,7 +38,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
     /* Files */
-    ADTFile current_open_file;
+    ADTRecordFile current_open_file;
 
     /* File menu actions */
     QAction* new_file;
@@ -79,11 +80,15 @@ class MainWindow : public QMainWindow
     QSpinBox* sp_decimal_places;
     QCheckBox* chbox_key;
 
+    /* Status bar */
+    QLabel* lbl_status_bar;
 
     /* init methods */
     void init_components();
     void init_actions();
     void init_field_dialog();
+    void initialStatus();
+    void enabledComponents();
 public:
     MainWindow(QWidget *parent = 0);
     ~MainWindow();

@@ -24,7 +24,7 @@ public:
     virtual bool isOK() const;
     //virtual bool isBOF();
     virtual bool isEOF() const;
-private:
+protected:
     string file_name;
     fstream fs;
     ios_base::openmode flags;

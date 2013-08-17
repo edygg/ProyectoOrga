@@ -51,10 +51,12 @@ void MainWindow::init_components() {
     utilities_menu->addAction(this->import_json);
 
     QLabel* main_status_bar = new QLabel();
+    this->lbl_status_bar = main_status_bar;
     main_status_bar->setAlignment(Qt::AlignHCenter);
     main_status_bar->setMinimumSize(main_status_bar->sizeHint());
     this->statusBar()->addWidget(main_status_bar);
 
+    initialStatus();
     this->setMinimumSize(500, 500);
     this->setWindowTitle(PROGRAM_NAME);
 }
@@ -247,6 +249,48 @@ void MainWindow::desactivateDecimalPlaces() {
     }
 }
 
+void MainWindow::initialStatus() {
+    this->save_file->setEnabled(false);
+    this->print_file->setEnabled(false);
+    this->close_file->setEnabled(false);
+    this->create_field->setEnabled(false);
+    this->change_field->setEnabled(false);
+    this->list_fields->setEnabled(false);
+    this->insert_record->setEnabled(false);
+    this->search_record->setEnabled(false);
+    this->delete_record->setEnabled(false);
+    this->list_records->setEnabled(false);
+    this->cross_tables->setEnabled(false);
+    this->create_simple_index->setEnabled(false);
+    this->create_Btree_index->setEnabled(false);
+    this->reindex->setEnabled(false);
+    this->export_xml->setEnabled(false);
+    this->import_xml->setEnabled(false);
+    this->export_json->setEnabled(false);
+    this->import_json->setEnabled(false);
+}
+
+void MainWindow::enabledComponents() {
+    this->save_file->setEnabled(true);
+    this->print_file->setEnabled(true);
+    this->close_file->setEnabled(true);
+    this->create_field->setEnabled(true);
+    this->change_field->setEnabled(true);
+    this->list_fields->setEnabled(true);
+    this->insert_record->setEnabled(true);
+    this->search_record->setEnabled(true);
+    this->delete_record->setEnabled(true);
+    this->list_records->setEnabled(true);
+    this->cross_tables->setEnabled(true);
+    this->create_simple_index->setEnabled(true);
+    this->create_Btree_index->setEnabled(true);
+    this->reindex->setEnabled(true);
+    this->export_xml->setEnabled(true);
+    this->import_xml->setEnabled(true);
+    this->export_json->setEnabled(true);
+    this->import_json->setEnabled(true);
+}
+
 void MainWindow::newFile() {
     QString folder = QFileDialog::getExistingDirectory(this, "New File", "");
     if (!folder.isEmpty()) {
@@ -256,11 +300,12 @@ void MainWindow::newFile() {
             QString path = folder + "/" + file_name + EXTENSION;
             if (!this->current_open_file.open(path.toStdString())) {
                 this->current_open_file.open(path.toStdString(), ios::out);
-                this->current_open_file.write(" ", 1);
+                this->current_open_file.write("%", 1);
                 this->current_open_file.flush();
                 this->current_open_file.close();
                 if(this->current_open_file.open(path.toStdString())) {
                     QMessageBox::information(this, "Successful", "Database created successfully");
+                    enabledComponents();
                 }
             }
         }
@@ -271,12 +316,20 @@ void MainWindow::openFile() {
     QString file_name = QFileDialog::getOpenFileName(this, "Open File", "", "Databases (*" + EXTENSION + ")");
 
     if (this->current_open_file.open(file_name.toStdString())) {
-        QMessageBox::information(this, "Successful", "Opened sucessfully");
+        this->lbl_status_bar->setText("Opened sucessfully");
+        enabledComponents();
+    } else {
+        this->lbl_status_bar->setText("");
     }
 }
 
 void MainWindow::saveFile() {
-    this->current_open_file.flush();
+    if(this->current_open_file.flush()) {
+        this->lbl_status_bar->setText("Saved successfully");
+    } else {
+        this->lbl_status_bar->setText("");
+    }
+
 }
 
 void MainWindow::printFile() {
@@ -284,10 +337,17 @@ void MainWindow::printFile() {
 }
 
 void MainWindow::closeFile() {
-    this->current_open_file.close();
+    if (this->current_open_file.close()) {
+        this->lbl_status_bar->setText("Closed successfully");
+        initialStatus();
+    } else {
+        this->lbl_status_bar->setText("");
+    }
 }
 
 void MainWindow::createField() {
+    Field f("Hola", INT_DT, 0, 0, false);
+    this->current_open_file.createField(f);
     this->field_dialog->exec();
 }
 

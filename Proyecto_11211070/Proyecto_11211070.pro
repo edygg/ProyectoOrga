@@ -15,8 +15,10 @@ TEMPLATE = app
 SOURCES += main.cpp\
         mainwindow.cpp \
     adtfile.cpp \
-    field.cpp
+    field.cpp \
+    adtrecordfile.cpp
 
 HEADERS  += mainwindow.h \
     adtfile.h \
-    field.h
+    field.h \
+    adtrecordfile.h

@@ -33,3 +33,7 @@ char Field::getDecimalPlaces() const {
 bool Field::isKey() const {
     return this->key;
 }
+
+bool Field::operator==(const Field& f) {
+    return this->name == f.name;
+}

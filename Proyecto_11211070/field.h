@@ -6,9 +6,9 @@ using namespace std;
 
 /* Constants */
 typedef char datatype;
-/*datatype INT = 'i';
-datatype REAL = 'r';
-datatype STRING = 'c';*/
+const datatype INT_DT = 'i';
+const datatype REAL_DT = 'r';
+const datatype STRING_DT = 'c';
 
 class Field
 {
@@ -20,6 +20,7 @@ public:
     char getLength() const;
     char getDecimalPlaces() const;
     bool isKey() const;
+    bool operator==(const Field&);
 private:
     string name;
     datatype data_type;
