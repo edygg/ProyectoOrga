@@ -12,6 +12,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::init_components() {
     init_actions();
+    init_field_dialog();
 
     /* File menu */
     QMenu* file_menu = menuBar()->addMenu("File");
@@ -188,9 +189,25 @@ void MainWindow::init_actions() {
     this->import_json->setToolTip("Import data intro JSON file");
     this->import_json->setCheckable(false);
 }
-
 void MainWindow::init_field_dialog() {
     this->field_dialog = new QDialog(this);
+    QFormLayout* layout = new QFormLayout(this->field_dialog);
+    this->le_name = new QLineEdit(this->field_dialog);
+    this->le_name->maxLength(255);
+    layout->addRow(new QLabel("Name"), this->le_name);
+    QStringList cbox_options;
+    cbox_options << "Integer" << "Real" << "String";
+    this->cbox_datatype = new QComboBox(this->field_dialog);
+    this->cbox_datatype->addItems(cbox_options);
+    layout->addRow(new QLabel("Data Type"), this->cbox_datatype);
+
+    this->field_dialog->setLayout(layout);
+
+    this->field_dialog->setWindowTitle("Create a new field");
+    this->field_dialog->setModal(true);
+    this->field_dialog->showMaximized(false);
+    this->field_dialog->showMinimized(false);
+
 }
 
 void MainWindow::newFile() {
@@ -234,7 +251,7 @@ void MainWindow::closeFile() {
 }
 
 void MainWindow::createField() {
-
+    this->field_dialog->exec();
 }
 
 void MainWindow::changeField() {

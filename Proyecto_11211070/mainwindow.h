@@ -12,6 +12,9 @@
 #include <QFileDialog>
 #include <QInputDialog>
 #include <QDialog>
+#include <QFormLayout>
+#include <QLineEdit>
+#include <QComboBox>
 
 #include "adtfile.h"
 #include "field.h"
@@ -63,8 +66,11 @@ class MainWindow : public QMainWindow
     QAction* export_json;
     QAction* import_json;
 
-    /* Dialogs */
+
+    /* Field Dialog */
     QDialog* field_dialog;
+    QLineEdit* le_name;
+    QComboBox* cbox_datatype;
 
     /* init methods */
     void init_components();

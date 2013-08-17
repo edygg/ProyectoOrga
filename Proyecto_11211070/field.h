@@ -1,29 +1,30 @@
 #ifndef FIELD_H
 #define FIELD_H
 
-#include <QString>
+#include <string>
+using namespace std;
 
 /* Constants */
-typedef const int datatype;
-datatype INTEGER = 1;
-datatype REAL = 2;
-datatype CHARACTER = 3;
+typedef char datatype;
+/*datatype INT = 'i';
+datatype REAL = 'r';
+datatype STRING = 'c';*/
 
 class Field
 {
 public:
-    Field(QString name, datatype dt, unsigned int length, unsigned int decimal_places, bool key);
-    void setName(QString);
-    QString getName() const;
+    Field(string name, datatype dt, char length, char decimal_places, bool key);
+    void setName(string);
+    string getName() const;
     datatype getDatatype() const;
-    unsigned int getLength() const;
-    unsigned int getDecimalPlaces() const;
+    char getLength() const;
+    char getDecimalPlaces() const;
     bool isKey() const;
 private:
-    QString name;
+    string name;
     datatype data_type;
-    unsigned int length;
-    unsigned int decimal_places;
+    char length;
+    char decimal_places;
     bool key;
 };
 
