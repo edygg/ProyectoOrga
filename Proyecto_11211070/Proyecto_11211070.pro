@@ -14,7 +14,9 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    ADTFile.cpp
+    adtfile.cpp \
+    field.cpp
 
 HEADERS  += mainwindow.h \
-    ADTFile.h
+    adtfile.h \
+    field.h

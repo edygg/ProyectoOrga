@@ -10,6 +10,15 @@
 #include <QLabel>
 #include <QStatusBar>
 #include <QFileDialog>
+#include <QInputDialog>
+#include <QDialog>
+
+#include "adtfile.h"
+#include "field.h"
+
+#include <iostream>
+#include <string>
+using namespace std;
 
 /* Constants */
 const QString PROGRAM_NAME = "Edilson Fernando Gonzalez";
@@ -19,6 +28,9 @@ const QString TEMP_FILE = "temp_file" + EXTENSION;
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
+
+    /* Files */
+    ADTFile current_open_file;
 
     /* File menu actions */
     QAction* new_file;
@@ -51,9 +63,13 @@ class MainWindow : public QMainWindow
     QAction* export_json;
     QAction* import_json;
 
+    /* Dialogs */
+    QDialog* field_dialog;
+
     /* init methods */
     void init_components();
     void init_actions();
+    void init_field_dialog();
 public:
     MainWindow(QWidget *parent = 0);
     ~MainWindow();

@@ -8,7 +8,6 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow()
 {
-    
 }
 
 void MainWindow::init_components() {
@@ -190,16 +189,40 @@ void MainWindow::init_actions() {
     this->import_json->setCheckable(false);
 }
 
-void MainWindow::newFile() {
+void MainWindow::init_field_dialog() {
+    this->field_dialog = new QDialog(this);
+}
 
+void MainWindow::newFile() {
+    QString folder = QFileDialog::getExistingDirectory(this, "New File", "");
+    if (!folder.isEmpty()) {
+        bool ok;
+        QString file_name = QInputDialog::getText(this, "File name", "File Name: ", QLineEdit::Normal,"", &ok);
+        if (ok && !file_name.isEmpty()) {
+            QString path = folder + "/" + file_name + EXTENSION;
+            if (!this->current_open_file.open(path.toStdString())) {
+                this->current_open_file.open(path.toStdString(), ios::out);
+                this->current_open_file.write(" ", 1);
+                this->current_open_file.flush();
+                this->current_open_file.close();
+                if(this->current_open_file.open(path.toStdString())) {
+                    QMessageBox::information(this, "Successful", "Database created successfully");
+                }
+            }
+        }
+    }
 }
 
 void MainWindow::openFile() {
     QString file_name = QFileDialog::getOpenFileName(this, "Open File", "", "Databases (*" + EXTENSION + ")");
+
+    if (this->current_open_file.open(file_name.toStdString())) {
+        QMessageBox::information(this, "Successful", "Opened sucessfully");
+    }
 }
 
 void MainWindow::saveFile() {
-    QString file_name = QFileDialog::getSaveFileName(this, "Save File", "", "Databases (*" + EXTENSION + ")");
+    this->current_open_file.flush();
 }
 
 void MainWindow::printFile() {
@@ -207,7 +230,7 @@ void MainWindow::printFile() {
 }
 
 void MainWindow::closeFile() {
-
+    this->current_open_file.close();
 }
 
 void MainWindow::createField() {

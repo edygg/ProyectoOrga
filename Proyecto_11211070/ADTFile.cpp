@@ -1,16 +1,18 @@
-#include "ADTFile.h"
+#include "adtfile.h"
 
-ADTFile::ADTFile(string path) {
-    this->file_name = path;
+ADTFile::ADTFile() {}
+
+ADTFile::~ADTFile() {
+    this->flush();
+    this->close();
 }
 
-ADTFile::~ADTFile() {}
-
-ADTFile::open(ios_base::openmode flags) {
+bool ADTFile::open(string path, ios_base::openmode flags) {
+    this->file_name = path;
     this->flags = flags;
     fs.open(this->file_name.c_str(), this->flags);
 
-    return !fs.fail();
+    return fs.is_open();
 }
 
 bool ADTFile::close() {
@@ -18,14 +20,28 @@ bool ADTFile::close() {
     return !fs.fail();
 }
 
-int ADTFile::read(char* buffer, int size) {
-    if (!fs.is_open() || this->flags & io_base::in == 0) {
+streamsize ADTFile::read(char* buffer, int size) {
+    if (!fs.is_open() || (this->flags & fstream::in) == 0) {
         return -1;
     }
 
     fs.write(buffer, size);
 
-    if (fs.fail()) {
+    if (!fs.fail()) {
+        return fs.gcount();
+    } else {
+        return -1;
+    }
+}
+
+int ADTFile::write(const char* buffer, int size) {
+    if (!fs.is_open() || (this->flags & fstream::out) == 0) {
+        return -1;
+    }
+
+    fs.write(buffer, size);
+
+    if (!fs.fail()) {
         return size;
     } else {
         return -1;
@@ -40,32 +56,32 @@ bool ADTFile::flush() {
     return !fs.flush().fail();
 }
 
-bool ADTFile::seekg(int pos) {
-    if (!fs.is_open() && this->flags & ios_base::in == 0) {
+bool ADTFile::seekg(int pos, ios_base::seekdir dir) {
+    if (!fs.is_open() || (this->flags & fstream::in) == 0) {
         return false;
     }
 
-    return !fs.seekg(pos).fail();
+    return !fs.seekg(pos, dir).fail();
 }
 
-int ADTFile::tellg() {
-    if (!fs.is_open() && this->flags & ios_base::in == 0) {
+streamoff ADTFile::tellg() {
+    if (!fs.is_open() || (this->flags & fstream::in) == 0) {
         return -1;
     }
 
     return fs.tellg();
 }
 
-bool ADTFile::seekp(int pos) {
-    if (!fs.is_open() && this->flags & ios_base::out == 0) {
+bool ADTFile::seekp(int pos, ios_base::seekdir dir) {
+    if (!fs.is_open() || (this->flags & fstream::out) == 0) {
         return false;
     }
 
-    return !fs.seekp(pos).fail();
+    return !fs.seekp(pos, dir).fail();
 }
 
-int ADTFile::tellp() {
-    if (!fs.is_open() && this->flags & ios_base::out == 0) {
+streamoff ADTFile::tellp() {
+    if (!fs.is_open() || (this->flags & fstream::out) == 0) {
         return -1;
     }
 
@@ -79,21 +95,22 @@ bool ADTFile::isOpen() const {
 bool ADTFile::isOK() const {
     return fs.good();
 }
-
+/*
 bool ADTFile::isBOF() {
     if (!fs.is_open()) {
         return false;
     }
-
-    if (this->flags & ios_base::in != 0) {
-        return fs.tellg() == 0;
+    const long zero = 0;
+    if ((this->flags & fstream::in) != 0) {
+        return fs.tellg() == zero;
     }
 
-    if (this->flags & ios_base::out != 0) {
-        return fs.tellp() == 0;
+    if ((this->flags & fstream::out) != 0) {
+        return fs.tellp() == zero;
     }
 }
-
+*/
 bool ADTFile::isEOF() const {
     return fs.eof();
 }
+
