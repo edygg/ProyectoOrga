@@ -19,6 +19,7 @@
 #include <QSpinBox>
 #include <QCheckBox>
 #include <QPushButton>
+#include <QTableWidget>
 
 #include "adtfile.h"
 #include "field.h"
@@ -26,6 +27,8 @@
 
 #include <iostream>
 #include <string>
+#include <vector>
+#include <sstream>
 using namespace std;
 
 /* Constants */
@@ -83,12 +86,16 @@ class MainWindow : public QMainWindow
     /* Status bar */
     QLabel* lbl_status_bar;
 
+    /* Main Table */
+    QTableWidget* main_table;
+
     /* init methods */
     void init_components();
     void init_actions();
     void init_field_dialog();
     void initialStatus();
     void enabledComponents();
+    void clearMainTable();
 public:
     MainWindow(QWidget *parent = 0);
     ~MainWindow();

@@ -50,11 +50,16 @@ void MainWindow::init_components() {
     utilities_menu->addAction(this->export_json);
     utilities_menu->addAction(this->import_json);
 
+    /* Status bar */
     QLabel* main_status_bar = new QLabel();
     this->lbl_status_bar = main_status_bar;
     main_status_bar->setAlignment(Qt::AlignHCenter);
     main_status_bar->setMinimumSize(main_status_bar->sizeHint());
     this->statusBar()->addWidget(main_status_bar);
+
+    /* Main table */
+    this->main_table = new QTableWidget(this);
+    this->setCentralWidget(main_table);
 
     initialStatus();
     this->setMinimumSize(500, 500);
@@ -293,6 +298,10 @@ void MainWindow::enabledComponents() {
 }
 
 void MainWindow::newFile() {
+    if (this->current_open_file.open()) {
+        this->current_open_file.close();
+    }
+
     QString folder = QFileDialog::getExistingDirectory(this, "New File", "");
     if (!folder.isEmpty()) {
         bool ok;
@@ -314,6 +323,10 @@ void MainWindow::newFile() {
 }
 
 void MainWindow::openFile() {
+    if (this->current_open_file.open()) {
+        this->current_open_file.close();
+    }
+
     QString file_name = QFileDialog::getOpenFileName(this, "Open File", "", "Databases (*" + EXTENSION + ")");
 
     if (this->current_open_file.open(file_name.toStdString())) {
@@ -365,6 +378,7 @@ void MainWindow::saveField() {
                         this->chbox_key->checkState()
                         );
             this->current_open_file.createField(*neo);
+            this->lbl_status_bar->setText("Success");
         } else if (this->cbox_datatype->currentText() == "String") {
             neo = new Field(
                         this->le_name->text().toStdString(),
@@ -374,6 +388,7 @@ void MainWindow::saveField() {
                         this->chbox_key->checkState()
                         );
             this->current_open_file.createField(*neo);
+            this->lbl_status_bar->setText("Success");
         } else {
             neo = new Field(
                         this->le_name->text().toStdString(),
@@ -383,7 +398,12 @@ void MainWindow::saveField() {
                         this->chbox_key->checkState()
                         );
             this->current_open_file.createField(*neo);
+            this->lbl_status_bar->setText("Success");
         }
+
+        this->le_name->setText("");
+        this->sp_length->setValue(1);
+        this->sp_decimal_places->setValue(0);
     }
 }
 
@@ -392,7 +412,66 @@ void MainWindow::changeField() {
 }
 
 void MainWindow::listFields() {
+   this->clearMainTable();
 
+    this->current_open_file.readFileStructure();
+    vector<Field> fields = this->current_open_file.listFields();
+    this->main_table->setColumnCount(5);
+    QStringList headers;
+    headers << "Name" << "Data Type" << "Length" << "Decimal Places" << "Key";
+    this->main_table->setHorizontalHeaderLabels(headers);
+    this->main_table->setRowCount(fields.size());
+
+    for (int i = 0; i < fields.size(); i++) {
+        stringstream ss;
+        string value;
+        QString value2;
+        Field* curr = &fields[i];
+        ss << curr->getName();
+        ss >> value;
+        value2 = QString::fromStdString(value);
+        this->main_table->setItem(i, 0, new QTableWidgetItem(value2));
+
+        if (curr->getDatatype() == INT_DT) {
+            value2 = "INTEGER";
+        } else if (curr->getDatatype() == STRING_DT) {
+            value2 = "STRING";
+        } else {
+            value2 = "REAL";
+        }
+        this->main_table->setItem(i, 1, new QTableWidgetItem(value2));
+
+        value2 = QString::number((int) curr->getLength());
+        this->main_table->setItem(i, 2, new QTableWidgetItem(value2));
+
+        if (curr->getDatatype() != REAL_DT) {
+            value2 = "0";
+        } else {
+            value2 = QString::number((int) curr->getDecimalPlaces());
+        }
+        this->main_table->setItem(i, 3, new QTableWidgetItem(value2));
+
+        if (curr->isKey()) {
+            value2 = "Yes";
+        } else {
+            value2 = "No";
+        }
+        this->main_table->setItem(i, 4, new QTableWidgetItem(value2));
+    }
+}
+
+void MainWindow::clearMainTable() {
+    if (!this->main_table) {
+        return;
+    }
+
+    while(this->main_table->rowCount() > 0) {
+        this->main_table->removeRow(0);
+    }
+
+    while (this->main_table->columnCount() > 0) {
+        this->main_table->removeColumn(0);
+    }
 }
 
 void MainWindow::insertRecord() {
