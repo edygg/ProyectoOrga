@@ -114,6 +114,7 @@ public slots:
 
     /* Create Field Dialog */
     void desactivateDecimalPlaces();
+    void saveField();
 };
 
 #endif // MAINWINDOW_H

@@ -225,6 +225,7 @@ void MainWindow::init_field_dialog() {
     QPushButton* btn_cancel = new QPushButton("Cancel", this->field_dialog);
     connect(btn_cancel, SIGNAL(clicked()), this->field_dialog, SLOT(close()));
     QPushButton* btn_save_field = new QPushButton("Save", this->field_dialog);
+    connect(btn_save_field, SIGNAL(clicked()), this, SLOT(saveField()));
     layout->addWidget(btn_save_field);
     layout->addWidget(btn_cancel);
 
@@ -346,9 +347,44 @@ void MainWindow::closeFile() {
 }
 
 void MainWindow::createField() {
-    Field f("Hola", INT_DT, 0, 0, false);
-    this->current_open_file.createField(f);
     this->field_dialog->exec();
+}
+
+void MainWindow::saveField() {
+    if (this->le_name->text().isEmpty() || (this->sp_decimal_places->isEnabled() && this->sp_decimal_places->value() >= this->sp_length->value())) {
+        QMessageBox::warning(this->field_dialog, "Error", "Check field values");
+    } else {
+        Field* neo;
+
+        if (this->cbox_datatype->currentText() == "Integer") {
+            neo = new Field(
+                        this->le_name->text().toStdString(),
+                        INT_DT,
+                        this->sp_length->value(),
+                        255,
+                        this->chbox_key->checkState()
+                        );
+            this->current_open_file.createField(*neo);
+        } else if (this->cbox_datatype->currentText() == "String") {
+            neo = new Field(
+                        this->le_name->text().toStdString(),
+                        STRING_DT,
+                        this->sp_length->value(),
+                        255,
+                        this->chbox_key->checkState()
+                        );
+            this->current_open_file.createField(*neo);
+        } else {
+            neo = new Field(
+                        this->le_name->text().toStdString(),
+                        REAL_DT,
+                        this->sp_length->value(),
+                        this->sp_decimal_places->value(),
+                        this->chbox_key->checkState()
+                        );
+            this->current_open_file.createField(*neo);
+        }
+    }
 }
 
 void MainWindow::changeField() {

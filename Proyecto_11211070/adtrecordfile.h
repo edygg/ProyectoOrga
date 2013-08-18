@@ -5,6 +5,9 @@
 #include "adtfile.h"
 #include "field.h"
 
+const int AVAILIST_LENGTH = 4;
+const char HEADER_END = '&';
+
 class ADTRecordFile : public ADTFile
 {
 public:
@@ -20,6 +23,7 @@ public:
     //bool writeRecord(string);
     //bool updateRecord(int, string);
     //bool deleteRecord(int);
+    int get();
 private:
     void compact();
     vector<Field> fields;
