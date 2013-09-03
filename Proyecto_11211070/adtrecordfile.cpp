@@ -55,10 +55,13 @@ void ADTRecordFile::readFileStructure() {
             char l = header[count++];
             char dp = header[count++];
             bool k;
+            cout << header[count] << endl;
             if (header[count] == '1') {
                 k = true;
+                cout << "soy verdadero" << endl;
             } else {
                 k = false;
+                cout << "soy falso" << endl;
             }
 
             Field neo(n, t, l, dp, k);

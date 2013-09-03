@@ -16,8 +16,9 @@ bool ADTFile::open(string path, ios_base::openmode flags) {
 }
 
 bool ADTFile::close() {
+    fs.flush();
     fs.close();
-    return !fs.fail();
+    return !this->isOpen();
 }
 
 streamsize ADTFile::read(char* buffer, int size) {
@@ -95,21 +96,8 @@ bool ADTFile::isOpen() const {
 bool ADTFile::isOK() const {
     return fs.good();
 }
-/*
-bool ADTFile::isBOF() {
-    if (!fs.is_open()) {
-        return false;
-    }
-    const long zero = 0;
-    if ((this->flags & fstream::in) != 0) {
-        return fs.tellg() == zero;
-    }
 
-    if ((this->flags & fstream::out) != 0) {
-        return fs.tellp() == zero;
-    }
-}
-*/
+
 bool ADTFile::isEOF() const {
     return fs.eof();
 }

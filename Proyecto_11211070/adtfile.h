@@ -22,7 +22,6 @@ public:
     virtual streamoff tellp();
     virtual bool isOpen() const;
     virtual bool isOK() const;
-    //virtual bool isBOF();
     virtual bool isEOF() const;
 protected:
     string file_name;

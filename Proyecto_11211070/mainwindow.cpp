@@ -319,15 +319,15 @@ void MainWindow::enabledComponents() {
 }
 
 void MainWindow::newFile() {
-    if (this->current_open_file.open()) {
-        this->current_open_file.close();
-    }
-
     QString folder = QFileDialog::getExistingDirectory(this, "New File", "");
     if (!folder.isEmpty()) {
         bool ok;
         QString file_name = QInputDialog::getText(this, "File name", "File Name: ", QLineEdit::Normal,"", &ok);
         if (ok && !file_name.isEmpty()) {
+            if (this->current_open_file.isOpen()) {
+                this->current_open_file.close();
+            }
+
             QString path = folder + "/" + file_name + EXTENSION;
             if (!this->current_open_file.open(path.toStdString())) {
                 this->current_open_file.open(path.toStdString(), ios::out);
@@ -344,17 +344,19 @@ void MainWindow::newFile() {
 }
 
 void MainWindow::openFile() {
-    if (this->current_open_file.open()) {
-        this->current_open_file.close();
-    }
-
     QString file_name = QFileDialog::getOpenFileName(this, "Open File", "", "Databases (*" + EXTENSION + ")");
 
-    if (this->current_open_file.open(file_name.toStdString())) {
-        this->lbl_status_bar->setText("Opened sucessfully");
-        enabledComponents();
-    } else {
-        this->lbl_status_bar->setText("");
+    if (!file_name.isEmpty()) {
+        if (this->current_open_file.isOpen()) {
+            this->current_open_file.close();
+        }
+
+        if (this->current_open_file.open(file_name.toStdString())) {
+            this->lbl_status_bar->setText("Opened sucessfully");
+            enabledComponents();
+        } else {
+            this->lbl_status_bar->setText("Error opening file");
+        }
     }
 }
 
@@ -362,7 +364,7 @@ void MainWindow::saveFile() {
     if(this->current_open_file.flush()) {
         this->lbl_status_bar->setText("Saved successfully");
     } else {
-        this->lbl_status_bar->setText("");
+        this->lbl_status_bar->setText("Error saving file");
     }
 
 }
@@ -376,7 +378,7 @@ void MainWindow::closeFile() {
         this->lbl_status_bar->setText("Closed successfully");
         initialStatus();
     } else {
-        this->lbl_status_bar->setText("");
+        this->lbl_status_bar->setText("Error closing file");
     }
 }
 
