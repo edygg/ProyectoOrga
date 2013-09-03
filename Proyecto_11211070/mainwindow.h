@@ -75,13 +75,18 @@ class MainWindow : public QMainWindow
     QAction* import_json;
 
 
-    /* Field Dialog */
+    /* Create Field Dialog */
     QDialog* field_dialog;
     QLineEdit* le_name;
     QComboBox* cbox_datatype;
     QSpinBox* sp_length;
     QSpinBox* sp_decimal_places;
     QCheckBox* chbox_key;
+
+    /* Change Fields Dialog */
+    QDialog* change_field_dialog;
+    QComboBox* cbox_fields;
+    QLineEdit* le_new_field_name;
 
     /* Status bar */
     QLabel* lbl_status_bar;
@@ -93,6 +98,7 @@ class MainWindow : public QMainWindow
     void init_components();
     void init_actions();
     void init_field_dialog();
+    void init_change_field_dialog();
     void initialStatus();
     void enabledComponents();
     void clearMainTable();
@@ -122,6 +128,9 @@ public slots:
     /* Create Field Dialog */
     void desactivateDecimalPlaces();
     void saveField();
+
+    /* Change Field Dialog */
+    void updateFields();
 };
 
 #endif // MAINWINDOW_H

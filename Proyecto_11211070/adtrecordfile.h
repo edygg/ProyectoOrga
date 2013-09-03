@@ -19,6 +19,7 @@ public:
     //virtual bool seekp(int, ios_base::seekdir);
     //virtual streamoff tellp();
     bool createField(Field&);
+    bool changeFields(vector<Field>);
     vector<Field> listFields();
     //string readRecord(int);
     //bool writeRecord(string);

@@ -13,6 +13,7 @@ MainWindow::~MainWindow()
 void MainWindow::init_components() {
     init_actions();
     init_field_dialog();
+    init_change_field_dialog();
 
     /* File menu */
     QMenu* file_menu = menuBar()->addMenu("File");
@@ -201,7 +202,7 @@ void MainWindow::init_field_dialog() {
     QFormLayout* layout = new QFormLayout(this->field_dialog);
 
     this->le_name = new QLineEdit(this->field_dialog);
-    this->le_name->setMaxLength(255);
+    this->le_name->setMaxLength(30);
     QRegExp exp("[A-Za-z][A-Za-z0-9]*");
     this->le_name->setValidator(new QRegExpValidator(exp, this->field_dialog));
     layout->addRow(new QLabel("Name"), this->le_name);
@@ -245,6 +246,26 @@ void MainWindow::init_field_dialog() {
                                        & ~Qt::WindowContextHelpButtonHint
                                        & ~Qt::WindowMinimizeButtonHint);
 
+}
+
+void MainWindow::init_change_field_dialog() {
+    this->change_field_dialog = new QDialog(this, (windowFlags() | Qt::CustomizeWindowHint)
+                                            & ~Qt::WindowMaximizeButtonHint
+                                            & ~Qt::WindowContextHelpButtonHint
+                                            & ~Qt::WindowMinimizeButtonHint);
+    QVBoxLayout* layout = new QVBoxLayout(this->change_field_dialog);
+
+    this->cbox_fields = new QComboBox(this->change_field_dialog);
+    layout->addWidget(this->cbox_fields);
+
+    this->le_new_field_name = new QLineEdit(this->change_field_dialog);
+    this->le_new_field_name->setMaxLength(30);
+    QRegExp exp("[A-Za-z][A-Za-z0-9]*");
+    this->le_new_field_name->setValidator(new QRegExpValidator(exp, this->change_field_dialog));
+    layout->addWidget(this->le_new_field_name);
+    this->change_field_dialog->setLayout(layout);
+    QPushButton* btn_change = new QPushButton("Change" ,this->change_field_dialog);
+    connect(btn_change, SIGNAL(clicked()), this, SLOT(updateFields()));
 }
 
 void MainWindow::desactivateDecimalPlaces() {
@@ -408,6 +429,13 @@ void MainWindow::saveField() {
 }
 
 void MainWindow::changeField() {
+    this->cbox_fields->clear();
+
+
+    this->change_field_dialog->exec();
+}
+
+void MainWindow::updateFields() {
 
 }
 

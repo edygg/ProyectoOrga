@@ -143,6 +143,35 @@ bool ADTRecordFile::createField(Field& field) {
 
 }
 
+bool ADTRecordFile::changeFields(vector<Field> newFields) {
+    if (this->fields.size()!= newFields.size()) {
+        return false;
+    }
+
+    if (!fs.is_open() || (this->flags & ios::out) == 0) {
+        return false;
+    }
+
+    stringstream ss;
+
+    fs.seekp(0, ios_base::beg);
+    ss << setw(AVAILIST_LENGTH) << setfill('0') << avail_list;
+
+    for (int i = 0; i < newFields.size(); i++) {
+        ss << setw(30)<< setfill('_') << newFields[i].getName()
+           << setw(1) << newFields[i].getDatatype()
+           << setw(1) << newFields[i].getLength()
+           << setw(1) << newFields[i].getDecimalPlaces()
+           << setw(1) << newFields[i].isKey() ? '1' : '0';
+    }
+
+    ss << HEADER_END;
+
+    fs.write(ss.str().c_str(), ss.str().size());
+
+    return true;
+}
+
 int ADTRecordFile::get() {
     if (!fs.is_open() || (this->flags & ios::in) == 0) {
         return -1;
