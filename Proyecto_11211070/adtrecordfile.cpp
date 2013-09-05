@@ -151,7 +151,7 @@ void ADTRecordFile::rewriteFields() {
         ss << fields[i]->toString();
     }
 
-    cout << ss.str() << endl;
+    fs.write(ss.str().c_str(), ss.str().length());
 }
 
 

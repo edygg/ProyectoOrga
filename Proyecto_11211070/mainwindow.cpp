@@ -60,6 +60,7 @@ void MainWindow::init_components() {
 
     /* Main table */
     this->main_table = new QTableWidget(this);
+    this->main_table->setEditTriggers(QAbstractItemView::NoEditTriggers);
     this->setCentralWidget(main_table);
 
     initialStatus();
@@ -257,9 +258,9 @@ void MainWindow::init_change_field_dialog() {
 
     this->cbox_fields = new QComboBox(this->change_field_dialog);
     layout->addWidget(this->cbox_fields);
-
+    layout->addWidget(new QLabel("New name:", this->change_field_dialog));
     this->le_new_field_name = new QLineEdit(this->change_field_dialog);
-    this->le_new_field_name->setMaxLength(30);
+    this->le_new_field_name->setMaxLength(FIELD_LENGTH);
     QRegExp exp("[A-Za-z][A-Za-z0-9]*");
     this->le_new_field_name->setValidator(new QRegExpValidator(exp, this->change_field_dialog));
     layout->addWidget(this->le_new_field_name);
@@ -449,7 +450,19 @@ void MainWindow::changeField() {
 }
 
 void MainWindow::updateFields() {
+    QString selected_field = this->cbox_fields->currentText();
+    vector<Field*> f = this->current_open_file.listFields();
+    for (int i = 0; i < f.size(); i++) {
+        Field* curr = f[i];
+        if (QString::fromStdString(curr->getName()) == selected_field) {
+            curr->setName(this->le_new_field_name->text().toStdString());
+            break;
+        }
+    }
+    this->le_new_field_name->setText("");
     this->current_open_file.rewriteFields();
+    this->lbl_status_bar->setText("Success");
+    this->change_field_dialog->close();
 }
 
 void MainWindow::listFields() {
