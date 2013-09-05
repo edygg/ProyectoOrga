@@ -8,7 +8,7 @@ using namespace std;
 
 ADTRecordFile::ADTRecordFile() : ADTFile()
 {
-    avail_list = -1;
+    this->readFileStructure();
 }
 
 ADTRecordFile::~ADTRecordFile(){}
@@ -19,7 +19,7 @@ void ADTRecordFile::readFileStructure() {
     }
 
     fs.seekg(0, ios_base::beg);
-    if (fs.get() == '%') {
+    if (fs.get() == '%' || fs.eof()) {
         return;
     } else {
         fs.seekg(0, ios_base::beg);
@@ -32,17 +32,14 @@ void ADTRecordFile::readFileStructure() {
         buffer[buffer_size] = '\0';
         string header(buffer);
         int count = 0;
-        string aval = header.substr(0, AVAILIST_LENGTH);
-        replace(aval.begin(), aval.end(), '0', ' ');
-        count += AVAILIST_LENGTH;
-        this->avail_list = stoi(aval.c_str());
-        cout << avail_list << endl;
+
         this->fields.clear();
         while (count < header.length()) {
-            string n = header.substr(count, 30);
+            string n = header.substr(count, FIELD_LENGTH);
             replace(n.begin(), n.end(), '_', ' ');
             n.erase(remove_if(n.begin(), n.end(), isspace), n.end());
-            count += 30;
+            count += FIELD_LENGTH;
+
             datatype t;
             if (header[count] == INT_DT) {
                 t = INT_DT;
@@ -51,54 +48,50 @@ void ADTRecordFile::readFileStructure() {
             } else {
                 t = REAL_DT;
             }
-            count++;
-            char l = header[count++];
-            char dp = header[count++];
+            count += DATA_TYPE_LENGTH;
+            int l = stoi(header.substr(count, LENGTH_LEGTH));
+            count += LENGTH_LEGTH;
+            int dp = 0;
+            if (t == REAL_DT) {
+                dp = stoi(header.substr(count, DECIMAL_PLACES_LEGTH));
+            }
+            count += DECIMAL_PLACES_LEGTH;
             bool k;
-            cout << header[count] << endl;
             if (header[count] == '1') {
                 k = true;
-                cout << "soy verdadero" << endl;
             } else {
                 k = false;
-                cout << "soy falso" << endl;
             }
+            count += KEY_LEGTH;
 
-            Field neo(n, t, l, dp, k);
+            Field* neo = new Field(n, t, l, dp, k);
             this->fields.push_back(neo);
         }
     }
 }
 
-vector<Field> ADTRecordFile::listFields() {
+vector<Field*> ADTRecordFile::listFields() {
+    this->readFileStructure();
     return this->fields;
 }
 
-bool ADTRecordFile::createField(Field& field) {
+bool ADTRecordFile::createField(Field* field) {
     if (!fs.is_open() || (this->flags & ios::out) == 0 || (this->flags & ios::in) == 0) {
         return false;
     }
 
     if (this->seekg(0, ios_base::beg)) {
         char c;
-        c = this->get();
+        c = this->getCharacter();
 
         if (c == '%') {
             ostringstream ss;
-            cout << avail_list << endl;
-            ss << setw(AVAILIST_LENGTH) << setfill('0') << avail_list;
 
-            ss << setw(30)<< setfill('_') << field.getName()
-               << setw(1) << field.getDatatype()
-               << setw(1) << field.getLength()
-               << setw(1) << field.getDecimalPlaces()
-               << setw(1) << field.isKey() ? '1' : '0';
-
+            ss <<field->toString();
             ss << HEADER_END;
 
-            cout << ss.str() << endl;
             this->fields.push_back(field);
-            this->record_length += field.getLength();
+            this->record_length += field->getLength();
             fs.seekp(0, ios_base::beg);
             fs.write(ss.str().c_str(), ss.str().length());
             fs.flush();
@@ -110,20 +103,17 @@ bool ADTRecordFile::createField(Field& field) {
                 c1 = fs.get();
             }
 
-            int buffer_size = (int) fs.tellg() - 2;
+            int buffer_size = (int) fs.tellg() - 1;
 
             char* buffer = new char[buffer_size];
             fs.seekg(0, ios_base::beg);
             fs.read(buffer, buffer_size);
+
             fstream temp_file("tmp", ios::out | ios::trunc);
             temp_file.write(buffer, buffer_size);
-            ostringstream ss;
-            ss << setw(30)<< setfill('_') << field.getName()
-               << setw(1) << field.getDatatype()
-               << setw(1) << field.getLength()
-               << setw(1) << field.getDecimalPlaces()
-               << setw(1) << field.isKey() ? '1' : '0';
 
+            ostringstream ss;
+            ss << field->toString();
             ss << HEADER_END;
 
             temp_file.write(ss.str().c_str(), ss.str().length());
@@ -131,6 +121,11 @@ bool ADTRecordFile::createField(Field& field) {
             temp_file.close();
             temp_file.open("tmp", ios::in);
             fs.seekp(0, ios_base::beg);
+
+            //Nuevo inicio de información
+            this->begin_body = buffer_size + ss.str().length() + 2;
+            this->fields.push_back(field);
+            this->record_length += field->getLength();
 
             while (!temp_file.eof()) {
                 char cpybuff[1024];
@@ -142,40 +137,25 @@ bool ADTRecordFile::createField(Field& field) {
     } else {
         return false;
     }
-
-
 }
 
-bool ADTRecordFile::changeFields(vector<Field> newFields) {
-    if (this->fields.size()!= newFields.size()) {
-        return false;
-    }
-
+void ADTRecordFile::rewriteFields() {
     if (!fs.is_open() || (this->flags & ios::out) == 0) {
-        return false;
+        return;
     }
-
-    stringstream ss;
 
     fs.seekp(0, ios_base::beg);
-    ss << setw(AVAILIST_LENGTH) << setfill('0') << avail_list;
+    ostringstream ss;
 
-    for (int i = 0; i < newFields.size(); i++) {
-        ss << setw(30)<< setfill('_') << newFields[i].getName()
-           << setw(1) << newFields[i].getDatatype()
-           << setw(1) << newFields[i].getLength()
-           << setw(1) << newFields[i].getDecimalPlaces()
-           << setw(1) << newFields[i].isKey() ? '1' : '0';
+    for (int i = 0; i < this->fields.size(); i++) {
+        ss << fields[i]->toString();
     }
 
-    ss << HEADER_END;
-
-    fs.write(ss.str().c_str(), ss.str().size());
-
-    return true;
+    cout << ss.str() << endl;
 }
 
-int ADTRecordFile::get() {
+
+int ADTRecordFile::getCharacter() {
     if (!fs.is_open() || (this->flags & ios::in) == 0) {
         return -1;
     }

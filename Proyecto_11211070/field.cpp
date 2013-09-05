@@ -1,8 +1,6 @@
 #include "field.h"
-#include <string>
-using namespace std;
 
-Field::Field(string name, datatype dt, char length, char decimal_places, bool key) {
+Field::Field(string name, datatype dt, int length, int decimal_places, bool key) {
     this->name = name.substr(0, 30);
     this->data_type = dt;
     this->length = length;
@@ -22,16 +20,26 @@ datatype Field::getDatatype() const {
     return this->data_type;
 }
 
-char Field::getLength() const {
+int Field::getLength() const {
     return this->length;
 }
 
-char Field::getDecimalPlaces() const {
+int Field::getDecimalPlaces() const {
     return this->decimal_places;
 }
 
 bool Field::isKey() const {
     return this->key;
+}
+
+string Field::toString() const {
+    ostringstream ss;
+    ss << setw(FIELD_LENGTH)<< setfill('_') << this->getName()
+       << setw(DATA_TYPE_LENGTH) << this->getDatatype()
+       << setw(LENGTH_LEGTH) << setfill('0') << this->getLength()
+       << setw(DECIMAL_PLACES_LEGTH) << setfill('0') << this->getDecimalPlaces()
+       << setw(KEY_LEGTH) << this->isKey() ? '1' : '0';
+    return ss.str();
 }
 
 bool Field::operator==(const Field& f) {

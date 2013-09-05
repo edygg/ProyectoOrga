@@ -263,9 +263,11 @@ void MainWindow::init_change_field_dialog() {
     QRegExp exp("[A-Za-z][A-Za-z0-9]*");
     this->le_new_field_name->setValidator(new QRegExpValidator(exp, this->change_field_dialog));
     layout->addWidget(this->le_new_field_name);
-    this->change_field_dialog->setLayout(layout);
     QPushButton* btn_change = new QPushButton("Change" ,this->change_field_dialog);
     connect(btn_change, SIGNAL(clicked()), this, SLOT(updateFields()));
+    layout->addWidget(btn_change);
+    this->change_field_dialog->setLayout(layout);
+
 }
 
 void MainWindow::desactivateDecimalPlaces() {
@@ -400,7 +402,7 @@ void MainWindow::saveField() {
                         255,
                         this->chbox_key->checkState()
                         );
-            this->current_open_file.createField(*neo);
+            this->current_open_file.createField(neo);
             this->lbl_status_bar->setText("Success");
         } else if (this->cbox_datatype->currentText() == "String") {
             neo = new Field(
@@ -410,7 +412,7 @@ void MainWindow::saveField() {
                         255,
                         this->chbox_key->checkState()
                         );
-            this->current_open_file.createField(*neo);
+            this->current_open_file.createField(neo);
             this->lbl_status_bar->setText("Success");
         } else {
             neo = new Field(
@@ -420,7 +422,7 @@ void MainWindow::saveField() {
                         this->sp_decimal_places->value(),
                         this->chbox_key->checkState()
                         );
-            this->current_open_file.createField(*neo);
+            this->current_open_file.createField(neo);
             this->lbl_status_bar->setText("Success");
         }
 
@@ -432,20 +434,28 @@ void MainWindow::saveField() {
 
 void MainWindow::changeField() {
     this->cbox_fields->clear();
+    vector<Field*> all_fields = this->current_open_file.listFields();
 
-
-    this->change_field_dialog->exec();
+    if (all_fields.size() != 0) {
+        for (int i = 0; i < all_fields.size(); i++) {
+            Field* current_field = all_fields[i];
+            QString op = QString::fromStdString(current_field->getName());
+            this->cbox_fields->addItem(op);
+        }
+        this->change_field_dialog->exec();
+    } else {
+        QMessageBox::critical(this, "No fields found", "There are no fields");
+    }
 }
 
 void MainWindow::updateFields() {
-
+    this->current_open_file.rewriteFields();
 }
 
 void MainWindow::listFields() {
-   this->clearMainTable();
+    this->clearMainTable();
 
-    this->current_open_file.readFileStructure();
-    vector<Field> fields = this->current_open_file.listFields();
+    vector<Field*> fields = this->current_open_file.listFields();
     this->main_table->setColumnCount(5);
     QStringList headers;
     headers << "Name" << "Data Type" << "Length" << "Decimal Places" << "Key";
@@ -456,7 +466,7 @@ void MainWindow::listFields() {
         stringstream ss;
         string value;
         QString value2;
-        Field* curr = &fields[i];
+        Field* curr = fields[i];
         ss << curr->getName();
         ss >> value;
         value2 = QString::fromStdString(value);
