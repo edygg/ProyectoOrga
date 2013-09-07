@@ -12,16 +12,11 @@ class ADTRecordFile : public ADTFile
 public:
     ADTRecordFile();
     virtual ~ADTRecordFile();
-    //virtual bool seekg(int, ios_base::seekdir);
-    //virtual streamoff tellg();
-    //virtual bool seekp(int, ios_base::seekdir);
-    //virtual streamoff tellp();
     bool createField(Field*);
     void rewriteFields();
     vector<Field*> listFields();
     //string readRecord(int);
     //bool writeRecord(string);
-    //bool updateRecord(int, string);
     //bool deleteRecord(int);
     int getCharacter();
 private:

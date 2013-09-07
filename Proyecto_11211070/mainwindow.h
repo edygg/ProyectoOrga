@@ -24,6 +24,7 @@
 #include "adtfile.h"
 #include "field.h"
 #include "adtrecordfile.h"
+#include "object.h"
 
 #include <iostream>
 #include <string>
