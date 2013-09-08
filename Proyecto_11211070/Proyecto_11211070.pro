@@ -18,11 +18,13 @@ SOURCES += main.cpp\
     field.cpp \
     adtrecordfile.cpp \
     object.cpp \
-    primaryindex.cpp
+    primaryindex.cpp \
+    record.cpp
 
 HEADERS  += mainwindow.h \
     adtfile.h \
     field.h \
     adtrecordfile.h \
     object.h \
-    primaryindex.h
+    primaryindex.h \
+    record.h

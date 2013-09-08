@@ -14,6 +14,7 @@ void MainWindow::init_components() {
     init_actions();
     init_field_dialog();
     init_change_field_dialog();
+    init_input_record_dialog();
 
     /* File menu */
     QMenu* file_menu = menuBar()->addMenu("File");
@@ -198,6 +199,19 @@ void MainWindow::init_actions() {
     this->import_json->setToolTip("Import data intro JSON file");
     this->import_json->setCheckable(false);
 }
+
+void MainWindow::init_input_record_dialog() {
+    this->input_record_dialog = new QDialog(this);
+    QVBoxLayout* layout = new QVBoxLayout(this->input_record_dialog);
+    this->lbl_message = new QLabel(this->input_record_dialog);
+    layout->addWidget(this->lbl_message);
+    this->le_input_data = new QLineEdit(this->input_record_dialog);
+    layout->addWidget(this->le_input_data);
+    this->btn_accept = new QPushButton("Add", this->input_record_dialog);
+    connect(this->btn_accept, SIGNAL(clicked()), this, SLOT(recieveInput()));
+    layout->addWidget(this->btn_accept);
+}
+
 void MainWindow::init_field_dialog() {
     this->field_dialog = new QDialog(this);
     QFormLayout* layout = new QFormLayout(this->field_dialog);
@@ -528,7 +542,44 @@ void MainWindow::clearMainTable() {
 }
 
 void MainWindow::insertRecord() {
+    vector<Field*> fields = this->current_open_file.listFields();
+    vector<string> record;
 
+    if (fields.size() == 0) {
+        QMessageBox::information(this, "Error", "There are no fields");
+    }
+
+    for (int i = 0; i < fields.size(); i++) {
+        Field* curr_f = fields[i];
+
+        this->lbl_message->setText(QString::fromStdString(curr_f->getName()));
+        this->le_input_data->setMaxLength(curr_f->getLength());
+        this->le_input_data->setText("");
+        stringstream regular_pattern;
+
+        if (curr_f->getDatatype() == INT_DT) {
+            regular_pattern << "[0-9]*";
+        } else if (curr_f->getDatatype() == REAL_DT) {
+            regular_pattern << "[0-9]*\.[0-9]{1,";
+            regular_pattern << curr_f->getDecimalPlaces();
+            regular_pattern << "}";
+        } else {
+            regular_pattern << "[A-Za-z0-9]*";
+        }
+
+        QRegExp exp(QString::fromStdString(regular_pattern.str()));
+        this->le_input_data->setValidator(new QRegExpValidator(exp, this->input_record_dialog));
+
+        this->input_record_dialog->exec();
+
+        record.push_back(this->str_input_data.toStdString());
+    }
+    Record r(fields, record);
+    if (this->current_open_file.addRecord(r)) {
+        this->lbl_status_bar->setText("Record added");
+    } else {
+        this->lbl_status_bar->setText("Error adding record");
+    }
 }
 
 void MainWindow::searchRecord() {
@@ -541,4 +592,13 @@ void MainWindow::deleteRecord() {
 
 void MainWindow::listRecods() {
 
+}
+
+void MainWindow::recieveInput() {
+    if (this->le_input_data->text().isEmpty()) {
+        QMessageBox::information(this->input_record_dialog, "Error", "Empty Input Data");
+    } else {
+        this->str_input_data = this->le_input_data->text();
+        this->input_record_dialog->close();
+    }
 }

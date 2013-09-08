@@ -89,6 +89,13 @@ class MainWindow : public QMainWindow
     QComboBox* cbox_fields;
     QLineEdit* le_new_field_name;
 
+    /* Input Record Dialog */
+    QDialog* input_record_dialog;
+    QLabel* lbl_message;
+    QLineEdit* le_input_data;
+    QPushButton* btn_accept;
+    QString str_input_data;
+
     /* Status bar */
     QLabel* lbl_status_bar;
 
@@ -100,6 +107,7 @@ class MainWindow : public QMainWindow
     void init_actions();
     void init_field_dialog();
     void init_change_field_dialog();
+    void init_input_record_dialog();
     void initialStatus();
     void enabledComponents();
     void clearMainTable();
@@ -132,6 +140,9 @@ public slots:
 
     /* Change Field Dialog */
     void updateFields();
+
+    /* Input Record Dialog */
+    void recieveInput();
 };
 
 #endif // MAINWINDOW_H

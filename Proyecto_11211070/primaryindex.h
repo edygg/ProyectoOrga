@@ -1,6 +1,7 @@
 #ifndef PRIMARYINDEX_H
 #define PRIMARYINDEX_H
 
+#include "object.h"
 #include <string>
 using namespace std;
 

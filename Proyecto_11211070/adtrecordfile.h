@@ -2,8 +2,23 @@
 #define ADTRECORDFILE_H
 
 #include <vector>
+#include <iostream>
+#include <sstream>
+#include <iomanip>
+#include <string>
+#include <algorithm>
+using namespace std;
+
+#include <QMap>
+#include <QString>
+#include <QStack>
+
 #include "adtfile.h"
 #include "field.h"
+#include "object.h"
+#include "primaryindex.h"
+#include "record.h"
+#include "primaryindex.h"
 
 const char HEADER_END = '&';
 
@@ -15,8 +30,8 @@ public:
     bool createField(Field*);
     void rewriteFields();
     vector<Field*> listFields();
-    //string readRecord(int);
-    //bool writeRecord(string);
+    //Record readRecord(PrimaryIndex);
+    bool addRecord(Record&);
     //bool deleteRecord(int);
     int getCharacter();
 private:
@@ -25,6 +40,8 @@ private:
     vector<Field*> fields;
     unsigned int record_length;
     streamoff begin_body;
+    QMap<QString, PrimaryIndex*> indexes;
+    QStack<streamoff> avail_list;
 };
 
 #endif // ADTRECORDFILE_H

@@ -1,10 +1,4 @@
 #include "adtrecordfile.h"
-#include <iostream>
-#include <sstream>
-#include <iomanip>
-#include <string>
-#include <algorithm>
-using namespace std;
 
 ADTRecordFile::ADTRecordFile() : ADTFile()
 {
@@ -161,4 +155,48 @@ int ADTRecordFile::getCharacter() {
     }
 
     return fs.get();
+}
+
+bool ADTRecordFile::addRecord(Record& r) {
+    if (!fs.is_open() || (this->flags & ios::out) == 0) {
+        return false;
+    }
+
+    vector<Field*> f = r.getFields();
+    vector<string> re = r.getRecord();
+    stringstream neo_key;
+
+    for (int i = 0; i < f.size(); i++) {
+        Field* curr_f = f[i];
+        if (curr_f->isKey()) {
+            string s = re[i];
+            neo_key << s;
+        }
+    }
+
+    QString n_key;
+    n_key = QString::fromStdString(neo_key.str());
+
+    if (indexes.contains(n_key)) {
+        return false;
+    }
+
+    streamoff position;
+
+    if (avail_list.isEmpty()) {
+        fs.seekp(0, ios_base::end);
+        position = fs.tellp();
+    } else {
+        fs.seekp(avail_list.pop(), ios_base::beg);
+        position = fs.tellp();
+    }
+
+    fs.write(r.toString().c_str(), r.toString().length());
+
+    if (fs.fail()) {
+        return false;
+    } else {
+        indexes.insert(n_key, new PrimaryIndex(n_key.toStdString(), position));
+        return true;
+    }
 }
