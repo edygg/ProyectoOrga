@@ -544,7 +544,7 @@ void MainWindow::clearMainTable() {
 void MainWindow::insertRecord() {
     vector<Field*> fields = this->current_open_file.listFields();
     vector<string> record;
-
+    //this->current_open_file.loadSimpleIndexes();
     if (fields.size() == 0) {
         QMessageBox::information(this, "Error", "There are no fields");
     }

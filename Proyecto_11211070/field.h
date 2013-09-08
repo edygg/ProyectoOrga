@@ -7,16 +7,23 @@
 using namespace std;
 
 /* Constants */
+/* Data Types */
 typedef char datatype;
 const datatype INT_DT = 'i';
 const datatype REAL_DT = 'r';
 const datatype STRING_DT = 'c';
 
+/* Lengths */
 const int FIELD_LENGTH = 30;
 const int DATA_TYPE_LENGTH = 1;
 const int LENGTH_LEGTH = 3;
 const int DECIMAL_PLACES_LEGTH = 3;
 const int KEY_LEGTH = 1;
+
+/* Default values */
+const string INT_DVALUE = "0";
+const string REAL_DVALUE = "0.0";
+const string STRING_DVALUE = "NULL";
 
 class Field
 {

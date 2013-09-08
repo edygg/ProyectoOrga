@@ -34,6 +34,7 @@ public:
     bool addRecord(Record&);
     //bool deleteRecord(int);
     int getCharacter();
+    void loadSimpleIndexes();
 private:
     void readFileStructure();
     void compact();

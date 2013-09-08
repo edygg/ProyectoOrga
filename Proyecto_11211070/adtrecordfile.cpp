@@ -3,6 +3,7 @@
 ADTRecordFile::ADTRecordFile() : ADTFile()
 {
     this->readFileStructure();
+    this->loadSimpleIndexes();
 }
 
 ADTRecordFile::~ADTRecordFile(){}
@@ -28,6 +29,7 @@ void ADTRecordFile::readFileStructure() {
         int count = 0;
 
         this->fields.clear();
+        this->record_length = 0;
         while (count < header.length()) {
             string n = header.substr(count, FIELD_LENGTH);
             replace(n.begin(), n.end(), '_', ' ');
@@ -44,6 +46,7 @@ void ADTRecordFile::readFileStructure() {
             }
             count += DATA_TYPE_LENGTH;
             int l = stoi(header.substr(count, LENGTH_LEGTH));
+            this->record_length += l;
             count += LENGTH_LEGTH;
             int dp = 0;
             if (t == REAL_DT) {
@@ -62,6 +65,73 @@ void ADTRecordFile::readFileStructure() {
             this->fields.push_back(neo);
         }
     }
+}
+
+void ADTRecordFile::loadSimpleIndexes() {
+    if (!fs.is_open() || (this->flags & ios::in) == 0) {
+        return;
+    }
+
+    qDeleteAll(this->indexes);
+    this->indexes.clear();
+    fs.seekg(0, ios_base::beg);
+    while (fs.get() != HEADER_END);
+
+    streamoff n1 = fs.tellg();
+    fs.seekg(0, ios_base::end);
+    streamoff n2 = fs.tellg();
+
+    if (n1 == n2) {
+        return;
+    }
+
+    fs.seekg(n1, ios_base::beg);
+
+    char* buffer = new char[this->record_length + 1];
+
+    while (n1 != n2) {
+        streamoff pos = fs.tellg();
+        fs.read(buffer, this->record_length);
+        cout << "Lei" << endl;
+        buffer[this->record_length] = '\0';
+        string re(buffer);
+
+        stringstream k;
+        int count = 0;
+
+        for (int i = 0; i < this->fields.size(); i++) {
+            cout << "Estoy dentro del for" << endl;
+            Field* curr_f = this->fields[i];
+
+            if (curr_f->isKey()) {
+                cout << "Estoy dentro del if" << endl;
+                if (curr_f->getDatatype() == STRING_DT) {
+                    cout << "soy una llave cadena" << endl;
+                    string n = re.substr(count, curr_f->getLength());
+                    replace(n.begin(), n.end(), '_', ' ');
+                    n.erase(remove_if(n.begin(), n.end(), isspace), n.end());
+                    k << n;
+
+                } else if (curr_f->getDatatype() == INT_DT) {
+                    string n = re.substr(count, curr_f->getLength());
+                    int number = stoi(n);
+                    k << number;
+                } else {
+                    string n = re.substr(count, curr_f->getLength());
+                    double number = stod(n);
+                    k << number;
+                }
+            }
+
+            count += curr_f->getLength();
+        }
+        this->indexes.insert(QString::fromStdString(k.str()), new PrimaryIndex(k.str(), pos));
+        n1 = fs.tellg();
+        if (fs.fail()) {
+            return;
+        }
+    }
+    cout << "Ya sali" << endl;
 }
 
 vector<Field*> ADTRecordFile::listFields() {
