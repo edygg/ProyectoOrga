@@ -1,4 +1,6 @@
 #include "adtrecordfile.h"
+#include <algorithm>
+using namespace std;
 
 ADTRecordFile::ADTRecordFile() : ADTFile()
 {
@@ -33,7 +35,10 @@ void ADTRecordFile::readFileStructure() {
         while (count < header.length()) {
             string n = header.substr(count, FIELD_LENGTH);
             replace(n.begin(), n.end(), '_', ' ');
-            n.erase(remove_if(n.begin(), n.end(), isspace), n.end());
+            stringstream trimmer;
+            trimmer << n;
+            trimmer >> n;
+
             count += FIELD_LENGTH;
 
             datatype t;
@@ -45,12 +50,12 @@ void ADTRecordFile::readFileStructure() {
                 t = REAL_DT;
             }
             count += DATA_TYPE_LENGTH;
-            int l = stoi(header.substr(count, LENGTH_LEGTH));
+            int l = atoi(header.substr(count, LENGTH_LEGTH).c_str());
             this->record_length += l;
             count += LENGTH_LEGTH;
             int dp = 0;
             if (t == REAL_DT) {
-                dp = stoi(header.substr(count, DECIMAL_PLACES_LEGTH));
+                dp = atoi(header.substr(count, DECIMAL_PLACES_LEGTH).c_str());
             }
             count += DECIMAL_PLACES_LEGTH;
             bool k;
@@ -109,16 +114,18 @@ void ADTRecordFile::loadSimpleIndexes() {
                     cout << "soy una llave cadena" << endl;
                     string n = re.substr(count, curr_f->getLength());
                     replace(n.begin(), n.end(), '_', ' ');
-                    n.erase(remove_if(n.begin(), n.end(), isspace), n.end());
+                    stringstream trimmer;
+                    trimmer << n;
+                    trimmer >> n;
                     k << n;
 
                 } else if (curr_f->getDatatype() == INT_DT) {
                     string n = re.substr(count, curr_f->getLength());
-                    int number = stoi(n);
+                    int number = atoi(n.c_str());
                     k << number;
                 } else {
                     string n = re.substr(count, curr_f->getLength());
-                    double number = stod(n);
+                    double number = atof(n.c_str());
                     k << number;
                 }
             }

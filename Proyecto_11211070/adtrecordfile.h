@@ -7,6 +7,7 @@
 #include <iomanip>
 #include <string>
 #include <algorithm>
+#include <cstdlib>
 using namespace std;
 
 #include <QMap>

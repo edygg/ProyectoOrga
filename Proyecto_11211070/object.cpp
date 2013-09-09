@@ -6,7 +6,6 @@ Object::Object()
 
 string Object::toString() const {
     string retval = "Object@";
-    retval += (int) this;
     return retval;
 }
 
