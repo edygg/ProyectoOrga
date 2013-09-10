@@ -97,7 +97,6 @@ void ADTRecordFile::loadSimpleIndexes() {
     while (n1 != n2) {
         streamoff pos = fs.tellg();
         fs.read(buffer, this->record_length);
-        cout << "Lei" << endl;
         buffer[this->record_length] = '\0';
         string re(buffer);
 
@@ -105,13 +104,10 @@ void ADTRecordFile::loadSimpleIndexes() {
         int count = 0;
 
         for (int i = 0; i < this->fields.size(); i++) {
-            cout << "Estoy dentro del for" << endl;
             Field* curr_f = this->fields[i];
 
             if (curr_f->isKey()) {
-                cout << "Estoy dentro del if" << endl;
                 if (curr_f->getDatatype() == STRING_DT) {
-                    cout << "soy una llave cadena" << endl;
                     string n = re.substr(count, curr_f->getLength());
                     replace(n.begin(), n.end(), '_', ' ');
                     stringstream trimmer;
@@ -138,7 +134,6 @@ void ADTRecordFile::loadSimpleIndexes() {
             return;
         }
     }
-    cout << "Ya sali" << endl;
 }
 
 vector<Field*> ADTRecordFile::listFields() {
