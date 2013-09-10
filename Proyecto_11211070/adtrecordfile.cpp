@@ -272,3 +272,46 @@ bool ADTRecordFile::addRecord(Record& r) {
         return true;
     }
 }
+
+vector<PrimaryIndex*> ADTRecordFile::getAllIndexes() const {
+    return this->indexes.values().toVector().toStdVector();
+}
+
+Record* ADTRecordFile::readRecord(PrimaryIndex* r) {
+    if (!fs.is_open() || (this->flags & ios::in) == 0) {
+        return NULL;
+    }
+
+    fs.seekg(r->getOffset(), ios_base::beg);
+    char* buffer = new char[this->record_length + 1];
+    fs.read(buffer, this->record_length);
+    buffer[this->record_length] = '\0';
+    vector<string> content;
+    string reg(buffer);
+    int count = 0;
+
+    for (int i = 0; i < this->fields.size(); i++) {
+        Field* curr_f = this->fields[i];
+
+        if (curr_f->getDatatype() == STRING_DT) {
+            string n = reg.substr(count, curr_f->getLength());
+            replace(n.begin(), n.end(), '_', ' ');
+            stringstream trimmer;
+            trimmer << n;
+            trimmer >> n;
+            content.push_back(n);
+        } else if (curr_f->getDatatype() == INT_DT) {
+            string n = reg.substr(count, curr_f->getLength());
+            int number = atoi(n.c_str());
+            content.push_back(QString("%1").arg(number).toStdString());
+        } else {
+            string n = reg.substr(count, curr_f->getLength());
+            double number = atof(n.c_str());
+            content.push_back(QString("%1").arg(number).toStdString());
+        }
+
+        count += curr_f->getLength();
+    }
+
+    return new Record(this->fields, content);
+}

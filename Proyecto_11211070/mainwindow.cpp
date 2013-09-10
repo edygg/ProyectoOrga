@@ -167,6 +167,7 @@ void MainWindow::init_actions() {
     this->create_simple_index->setStatusTip("Create Simple Index");
     this->create_simple_index->setToolTip("Create Simple Index");
     this->create_simple_index->setCheckable(false);
+    connect(this->create_simple_index, SIGNAL(triggered()), this, SLOT(createSimpleIndex()));
 
     this->create_Btree_index = new QAction("Create B Tree Index", this);
     this->create_Btree_index->setStatusTip("Create B Tree Index");
@@ -555,6 +556,7 @@ void MainWindow::insertRecord() {
         this->lbl_message->setText(QString::fromStdString(curr_f->getName()));
         this->le_input_data->setMaxLength(curr_f->getLength());
         this->le_input_data->setText("");
+        this->str_input_data = "";
         stringstream regular_pattern;
 
         if (curr_f->getDatatype() == INT_DT) {
@@ -571,6 +573,10 @@ void MainWindow::insertRecord() {
         this->le_input_data->setValidator(new QRegExpValidator(exp, this->input_record_dialog));
 
         this->input_record_dialog->exec();
+
+        if (this->str_input_data.isEmpty()) {
+            return;
+        }
 
         record.push_back(this->str_input_data.toStdString());
     }
@@ -591,7 +597,22 @@ void MainWindow::deleteRecord() {
 }
 
 void MainWindow::listRecods() {
+    vector<PrimaryIndex*> indexes = this->current_open_file.getAllIndexes();
 
+    for (int i = 0; i < indexes.size(); i++) {
+        PrimaryIndex* curr_i = indexes[i];
+
+        Record* curr_r = this->current_open_file.readRecord(curr_i);
+
+        for (int j = 0; j < curr_r->getRecord().size(); j++) {
+            cout << curr_r->getRecord().at(i) << "     ";
+        }
+        cout << endl;
+    }
+}
+
+void MainWindow::createSimpleIndex() {
+    this->current_open_file.loadSimpleIndexes();
 }
 
 void MainWindow::recieveInput() {

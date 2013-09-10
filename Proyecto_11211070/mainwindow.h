@@ -134,6 +134,9 @@ public slots:
     void deleteRecord();
     void listRecods();
 
+    /* Indexes menu slots */
+    void createSimpleIndex();
+
     /* Create Field Dialog */
     void desactivateDecimalPlaces();
     void saveField();

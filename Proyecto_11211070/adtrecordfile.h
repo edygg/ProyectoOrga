@@ -31,8 +31,9 @@ public:
     bool createField(Field*);
     void rewriteFields();
     vector<Field*> listFields();
-    //Record readRecord(PrimaryIndex);
+    vector<PrimaryIndex*> getAllIndexes() const;
     bool addRecord(Record&);
+    Record* readRecord(PrimaryIndex*);
     //bool deleteRecord(int);
     int getCharacter();
     void loadSimpleIndexes();
