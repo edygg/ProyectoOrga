@@ -155,7 +155,7 @@ void MainWindow::init_actions() {
     this->list_records->setStatusTip("List all records");
     this->list_records->setToolTip("Search all records");
     this->list_records->setCheckable(false);
-    connect(this->list_records, SIGNAL(triggered()), this, SLOT(listRecods()));
+    connect(this->list_records, SIGNAL(triggered()), this, SLOT(listRecords()));
 
     this->cross_tables = new QAction("Cross", this);
     this->cross_tables->setStatusTip("Cross tables");
@@ -596,16 +596,19 @@ void MainWindow::deleteRecord() {
 
 }
 
-void MainWindow::listRecods() {
+void MainWindow::listRecords() {
     vector<PrimaryIndex*> indexes = this->current_open_file.getAllIndexes();
+
+
 
     for (int i = 0; i < indexes.size(); i++) {
         PrimaryIndex* curr_i = indexes[i];
 
         Record* curr_r = this->current_open_file.readRecord(curr_i);
+        vector<string> re = curr_r->getRecord();
 
-        for (int j = 0; j < curr_r->getRecord().size(); j++) {
-            cout << curr_r->getRecord().at(i) << "     ";
+        for (int i = 0; i < re.size(); i++) {
+            cout << re.at(i) << "    ";
         }
         cout << endl;
     }

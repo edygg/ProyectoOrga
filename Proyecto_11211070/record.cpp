@@ -1,4 +1,6 @@
 #include "record.h"
+#include <iostream>
+using namespace std;
 
 Record::Record(vector<Field*> f, vector<string> r)
 {
@@ -15,10 +17,6 @@ string Record::toString() const {
             Field* curr_f = fields[i];
             char fill = '_';
 
-            if (curr_f->getDatatype() == INT_DT || curr_f->getDatatype() == REAL_DT) {
-                fill = '0';
-            }
-
             ss << setw(curr_f->getLength()) << setfill(fill) << record[i];
         }
 
@@ -31,5 +29,10 @@ vector<Field*> Record::getFields() const {
 }
 
 vector<string> Record::getRecord() const {
+    cout << record.size() << endl;
+    for (int i = 0; i < record.size(); i++) {
+        cout << record[i] << "    ";
+    }
+    cout << endl;
     return this->record;
 }

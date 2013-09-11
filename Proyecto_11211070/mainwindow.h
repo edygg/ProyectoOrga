@@ -132,7 +132,7 @@ public slots:
     void insertRecord();
     void searchRecord();
     void deleteRecord();
-    void listRecods();
+    void listRecords();
 
     /* Indexes menu slots */
     void createSimpleIndex();

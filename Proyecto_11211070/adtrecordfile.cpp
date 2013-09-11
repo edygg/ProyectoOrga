@@ -79,6 +79,7 @@ void ADTRecordFile::loadSimpleIndexes() {
 
     qDeleteAll(this->indexes);
     this->indexes.clear();
+    this->readFileStructure();
     fs.seekg(0, ios_base::beg);
     while (fs.get() != HEADER_END);
 
@@ -99,7 +100,6 @@ void ADTRecordFile::loadSimpleIndexes() {
         fs.read(buffer, this->record_length);
         buffer[this->record_length] = '\0';
         string re(buffer);
-
         stringstream k;
         int count = 0;
 
@@ -107,32 +107,18 @@ void ADTRecordFile::loadSimpleIndexes() {
             Field* curr_f = this->fields[i];
 
             if (curr_f->isKey()) {
-                if (curr_f->getDatatype() == STRING_DT) {
-                    string n = re.substr(count, curr_f->getLength());
-                    replace(n.begin(), n.end(), '_', ' ');
-                    stringstream trimmer;
-                    trimmer << n;
-                    trimmer >> n;
-                    k << n;
-
-                } else if (curr_f->getDatatype() == INT_DT) {
-                    string n = re.substr(count, curr_f->getLength());
-                    int number = atoi(n.c_str());
-                    k << number;
-                } else {
-                    string n = re.substr(count, curr_f->getLength());
-                    double number = atof(n.c_str());
-                    k << number;
-                }
+                string n = re.substr(count, curr_f->getLength());
+                replace(n.begin(), n.end(), '_', ' ');
+                stringstream trimmer;
+                trimmer << n;
+                trimmer >> n;
+                k << n;
             }
-
             count += curr_f->getLength();
         }
         this->indexes.insert(QString::fromStdString(k.str()), new PrimaryIndex(k.str(), pos));
+        k.str("");
         n1 = fs.tellg();
-        if (fs.fail()) {
-            return;
-        }
     }
 }
 
@@ -273,7 +259,8 @@ bool ADTRecordFile::addRecord(Record& r) {
     }
 }
 
-vector<PrimaryIndex*> ADTRecordFile::getAllIndexes() const {
+vector<PrimaryIndex*> ADTRecordFile::getAllIndexes() {
+    this->loadSimpleIndexes();
     return this->indexes.values().toVector().toStdVector();
 }
 
@@ -293,22 +280,12 @@ Record* ADTRecordFile::readRecord(PrimaryIndex* r) {
     for (int i = 0; i < this->fields.size(); i++) {
         Field* curr_f = this->fields[i];
 
-        if (curr_f->getDatatype() == STRING_DT) {
-            string n = reg.substr(count, curr_f->getLength());
-            replace(n.begin(), n.end(), '_', ' ');
-            stringstream trimmer;
-            trimmer << n;
-            trimmer >> n;
-            content.push_back(n);
-        } else if (curr_f->getDatatype() == INT_DT) {
-            string n = reg.substr(count, curr_f->getLength());
-            int number = atoi(n.c_str());
-            content.push_back(QString("%1").arg(number).toStdString());
-        } else {
-            string n = reg.substr(count, curr_f->getLength());
-            double number = atof(n.c_str());
-            content.push_back(QString("%1").arg(number).toStdString());
-        }
+        string n = reg.substr(count, curr_f->getLength());
+        replace(n.begin(), n.end(), '_', ' ');
+        stringstream trimmer;
+        trimmer << n;
+        trimmer >> n;
+        content.push_back(n);
 
         count += curr_f->getLength();
     }
