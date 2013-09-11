@@ -589,6 +589,69 @@ void MainWindow::insertRecord() {
 }
 
 void MainWindow::searchRecord() {
+    vector<Field*> fields = this->current_open_file.listFields();
+    stringstream k;
+
+    for (int i = 0; i < fields.size(); i++) {
+        Field* curr_f = fields[i];
+
+        if (curr_f->isKey()) {
+            this->lbl_message->setText(QString::fromStdString(curr_f->getName()));
+            this->le_input_data->setMaxLength(curr_f->getLength());
+            this->le_input_data->setText("");
+            this->str_input_data = "";
+            stringstream regular_pattern;
+
+            if (curr_f->getDatatype() == INT_DT) {
+                regular_pattern << "[0-9]*";
+            } else if (curr_f->getDatatype() == REAL_DT) {
+                regular_pattern << "[0-9]*\.[0-9]{1,";
+                regular_pattern << curr_f->getDecimalPlaces();
+                regular_pattern << "}";
+            } else {
+                regular_pattern << "[A-Za-z0-9]*";
+            }
+
+            QRegExp exp(QString::fromStdString(regular_pattern.str()));
+            this->le_input_data->setValidator(new QRegExpValidator(exp, this->input_record_dialog));
+
+            this->input_record_dialog->exec();
+
+            if (this->str_input_data.isEmpty()) {
+                return;
+            }
+
+            k << this->str_input_data.toStdString();
+        }
+    }
+
+    PrimaryIndex* result_index = this->current_open_file.searchRecord(k.str());
+
+    if (result_index == NULL) {
+        QMessageBox::information(this, "Not Found", "The record doesn't exist");
+    } else {
+        Record* result_record = this->current_open_file.readRecord(result_index);
+
+        this->clearMainTable();
+        vector<Field*> fields = result_record->getFields();
+        this->main_table->setColumnCount(fields.size());
+        QStringList headers;
+
+        for (int i = 0; i < fields.size(); i++) {
+            Field* curr_f = fields[i];
+            headers << QString::fromStdString(curr_f->getName());
+        }
+
+        this->main_table->setHorizontalHeaderLabels(headers);
+        this->main_table->setRowCount(1);
+
+        vector<string> re = result_record->getRecord();
+
+        for (int j = 0; j < re.size(); j++) {
+            this->main_table->setItem(0, j, new QTableWidgetItem(QString::fromStdString(re.at(j))));
+        }
+
+    }
 
 }
 
@@ -599,7 +662,18 @@ void MainWindow::deleteRecord() {
 void MainWindow::listRecords() {
     vector<PrimaryIndex*> indexes = this->current_open_file.getAllIndexes();
 
+    this->clearMainTable();
+    vector<Field*> fields = this->current_open_file.listFields();
+    this->main_table->setColumnCount(fields.size());
+    QStringList headers;
 
+    for (int i = 0; i < fields.size(); i++) {
+        Field* curr_f = fields[i];
+        headers << QString::fromStdString(curr_f->getName());
+    }
+
+    this->main_table->setHorizontalHeaderLabels(headers);
+    this->main_table->setRowCount(indexes.size());
 
     for (int i = 0; i < indexes.size(); i++) {
         PrimaryIndex* curr_i = indexes[i];
@@ -607,10 +681,9 @@ void MainWindow::listRecords() {
         Record* curr_r = this->current_open_file.readRecord(curr_i);
         vector<string> re = curr_r->getRecord();
 
-        for (int i = 0; i < re.size(); i++) {
-            cout << re.at(i) << "    ";
+        for (int j = 0; j < re.size(); j++) {
+            this->main_table->setItem(i, j, new QTableWidgetItem(QString::fromStdString(re.at(j))));
         }
-        cout << endl;
     }
 }
 

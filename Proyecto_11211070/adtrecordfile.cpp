@@ -292,3 +292,16 @@ Record* ADTRecordFile::readRecord(PrimaryIndex* r) {
 
     return new Record(this->fields, content);
 }
+
+PrimaryIndex* ADTRecordFile::searchRecord(string k) {
+    if (!fs.is_open() || (this->flags & ios::in) == 0) {
+        return NULL;
+    }
+    this->loadSimpleIndexes();
+
+    if (!this->indexes.contains(QString::fromStdString(k))) {
+        return NULL;
+    }
+
+    return this->indexes.value(QString::fromStdString(k));
+}

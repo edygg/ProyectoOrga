@@ -29,10 +29,5 @@ vector<Field*> Record::getFields() const {
 }
 
 vector<string> Record::getRecord() const {
-    cout << record.size() << endl;
-    for (int i = 0; i < record.size(); i++) {
-        cout << record[i] << "    ";
-    }
-    cout << endl;
     return this->record;
 }

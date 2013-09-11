@@ -34,7 +34,8 @@ public:
     vector<PrimaryIndex*> getAllIndexes();
     bool addRecord(Record&);
     Record* readRecord(PrimaryIndex*);
-    //bool deleteRecord(int);
+    PrimaryIndex* searchRecord(string);
+    bool deleteRecord(string);
     int getCharacter();
     void loadSimpleIndexes();
 private:
