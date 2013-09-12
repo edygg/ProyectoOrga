@@ -100,6 +100,12 @@ void ADTRecordFile::loadSimpleIndexes() {
         fs.read(buffer, this->record_length);
         buffer[this->record_length] = '\0';
         string re(buffer);
+
+        if (re[0] == DELETED) {
+            n1 = fs.tellg();
+            continue;
+        }
+
         stringstream k;
         int count = 0;
 
@@ -304,4 +310,26 @@ PrimaryIndex* ADTRecordFile::searchRecord(string k) {
     }
 
     return this->indexes.value(QString::fromStdString(k));
+}
+
+bool ADTRecordFile::deleteRecord(string k) {
+    if (!fs.is_open() || (this->flags & ios::out) == 0) {
+        return false;
+    }
+
+    if (!this->indexes.contains(QString::fromStdString(k))) {
+        return false;
+    }
+
+    PrimaryIndex* i = this->indexes.value(QString::fromStdString(k));
+    int retval = this->indexes.remove(QString::fromStdString(k));
+
+    if (retval == 0) {
+        return false;
+    } else {
+        fs.seekp(i->getOffset(), ios_base::beg);
+        fs.write(&DELETED, 1);
+        this->avail_list.push(i->getOffset());
+        return true;
+    }
 }

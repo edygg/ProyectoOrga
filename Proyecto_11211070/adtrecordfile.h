@@ -22,6 +22,7 @@ using namespace std;
 #include "primaryindex.h"
 
 const char HEADER_END = '&';
+const char DELETED = '?';
 
 class ADTRecordFile : public ADTFile
 {

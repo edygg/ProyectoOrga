@@ -656,7 +656,47 @@ void MainWindow::searchRecord() {
 }
 
 void MainWindow::deleteRecord() {
+    vector<Field*> fields = this->current_open_file.listFields();
+    stringstream k;
 
+    for (int i = 0; i < fields.size(); i++){
+        Field* curr_f = fields[i];
+
+        if (curr_f->isKey()) {
+            this->lbl_message->setText(QString::fromStdString(curr_f->getName()));
+            this->le_input_data->setMaxLength(curr_f->getLength());
+            this->le_input_data->setText("");
+            this->str_input_data = "";
+            stringstream regular_pattern;
+
+            if (curr_f->getDatatype() == INT_DT) {
+                regular_pattern << "[0-9]*";
+            } else if (curr_f->getDatatype() == REAL_DT) {
+                regular_pattern << "[0-9]*\.[0-9]{1,";
+                regular_pattern << curr_f->getDecimalPlaces();
+                regular_pattern << "}";
+            } else {
+                regular_pattern << "[A-Za-z0-9]*";
+            }
+
+            QRegExp exp(QString::fromStdString(regular_pattern.str()));
+            this->le_input_data->setValidator(new QRegExpValidator(exp, this->input_record_dialog));
+
+            this->input_record_dialog->exec();
+
+            if (this->str_input_data.isEmpty()) {
+                return;
+            }
+
+            k << this->str_input_data.toStdString();
+        }
+    }
+
+    if (this->current_open_file.deleteRecord(k.str())) {
+        this->lbl_status_bar->setText("Deleted success");
+    } else {
+        QMessageBox::information(this, "Error", "The record doesn't exists");
+    }
 }
 
 void MainWindow::listRecords() {
