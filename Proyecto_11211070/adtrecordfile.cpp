@@ -103,6 +103,7 @@ void ADTRecordFile::loadSimpleIndexes() {
 
         if (re[0] == DELETED) {
             n1 = fs.tellg();
+            this->avail_list.push(pos);
             continue;
         }
 
