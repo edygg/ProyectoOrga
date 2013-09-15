@@ -397,6 +397,50 @@ void MainWindow::saveFile() {
 }
 
 void MainWindow::printFile() {
+    QString folder = QFileDialog::getExistingDirectory(this, "Print PDF file", "");
+    if (!folder.isEmpty()) {
+        folder += "/outputTable.pdf";
+        QString html_code = "";
+
+        html_code += "<table border=\"1\">";
+        html_code += "<tr>";
+
+        vector<Field*> fields = this->current_open_file.listFields();
+
+        for (int i = 0; i < fields.size(); i++) {
+            Field* curr_f = fields[i];
+
+            html_code += QString::fromStdString(string("<th>")) + QString::fromStdString(curr_f->getName()) + QString::fromStdString(string("</th>"));
+        }
+
+        html_code += "</tr>";
+
+        vector<PrimaryIndex*> indexes = this->current_open_file.getAllIndexes();
+
+        for (int i = 0; i < indexes.size(); i++) {
+            PrimaryIndex* curr_i = indexes[i];
+            Record* curr_r = this->current_open_file.readRecord(curr_i);
+            vector<string> re = curr_r->getRecord();
+            html_code += "<tr>";
+
+            for (int j = 0; j < re.size(); j++) {
+                html_code += QString::fromStdString(string("<td>")) + QString::fromStdString(re[j]) + QString::fromStdString(string("</td>"));
+            }
+
+            html_code += "</tr>";
+        }
+
+        html_code += "</table>";
+
+
+        QTextDocument doc;
+        doc.setHtml(html_code);
+        QPrinter printer;
+        printer.setOutputFileName(folder);
+        printer.setOutputFormat(QPrinter::PdfFormat);
+        doc.print(&printer);
+        printer.newPage();
+    }
 
 }
 

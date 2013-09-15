@@ -20,6 +20,8 @@
 #include <QCheckBox>
 #include <QPushButton>
 #include <QTableWidget>
+#include <QTextDocument>
+#include <QPrinter>
 
 #include "adtfile.h"
 #include "field.h"
