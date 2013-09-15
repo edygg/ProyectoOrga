@@ -197,11 +197,13 @@ void MainWindow::init_actions() {
     this->import_xml->setStatusTip("Import data intro XML file");
     this->import_xml->setToolTip("Import data intro XML file");
     this->import_xml->setCheckable(false);
+    connect(this->import_xml, SIGNAL(triggered()), this, SLOT(importXml()));
 
     this->export_json = new QAction("Export to JSON", this);
     this->export_json->setStatusTip("Export current database intro JSON file");
     this->export_json->setToolTip("Export current database intro JSON file");
     this->export_json->setCheckable(false);
+    connect(this->export_json, SIGNAL(triggered()), this, SLOT(exportJson()));
 
     this->import_json = new QAction("Import to JSON", this);
     this->import_json->setStatusTip("Import data intro JSON file");
@@ -829,6 +831,12 @@ void MainWindow::exportXml() {
 
                     xml_writer.writeStartElement(QString::fromStdString(curr_f->getName()));
 
+                    if (curr_f->isKey()) {
+                        xml_writer.writeAttribute(QString::fromStdString(string("key")), QString::fromStdString(string("true")));
+                    } else {
+                        xml_writer.writeAttribute(QString::fromStdString(string("key")), QString::fromStdString(string("false")));
+                    }
+
                     if (curr_f->getDatatype() == INT_DT) {
                         xml_writer.writeAttribute(QString::fromStdString(string("type")), QString::fromStdString(string("INT")));
                         xml_writer.writeAttribute(QString::fromStdString(string("length")), QString::number(curr_f->getLength()));
@@ -855,5 +863,49 @@ void MainWindow::exportXml() {
 }
 
 void MainWindow::exportJson() {
+    QString file_path = QFileDialog::getExistingDirectory(this, "Export JSON file", "");
 
+    if (!file_path.isEmpty()) {
+        file_path += "/outputJSON.json";
+
+        QFile file(file_path);
+
+        if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+            QMessageBox::warning(this, "Error", "Can not export the file");
+        } else {
+            QJsonDocument doc;
+            QJsonObject root;
+
+            vector<PrimaryIndex*> indexes = this->current_open_file.getAllIndexes();
+
+            for (int i = 0; i < indexes.size(); i++) {
+                QJsonObject curr_o;
+                PrimaryIndex* curr_i = indexes[i];
+                Record* curr_r = this->current_open_file.readRecord(curr_i);
+                vector<Field*> fields = curr_r->getFields();
+                vector<string> record = curr_r->getRecord();
+
+                for (int j = 0; j < fields.size(); j++) {
+                    Field* curr_f = fields[j];
+                    curr_o.insert(QString::fromStdString(curr_f->getName()), QJsonValue(QString::fromStdString(record[j])));
+                }
+                root.insert(QString::fromStdString(string("Record")) + QString::number(i), QJsonValue(curr_o));
+            }
+
+            doc.setObject(root);
+            QString result(doc.toJson());
+
+            QTextStream out(&file);
+
+            out << result;
+        }
+    }
+}
+
+void MainWindow::importXml() {
+    QString file_name = QFileDialog::getOpenFileName(this, "Import XML file", "", "XML (*.xml)");
+
+    if (!file_name.isEmpty()) {
+
+    }
 }

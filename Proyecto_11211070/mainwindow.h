@@ -24,6 +24,11 @@
 #include <QPrinter>
 #include <QFile>
 #include <QXmlStreamWriter>
+#include <QTextStream>
+#include <QJsonDocument>
+#include <QJsonValue>
+#include <QJsonObject>
+
 
 #include "adtfile.h"
 #include "field.h"
@@ -146,6 +151,7 @@ public slots:
     /* Utilities menu slots */
     void exportJson();
     void exportXml();
+    void importXml();
 
     /* Create Field Dialog */
     void desactivateDecimalPlaces();
