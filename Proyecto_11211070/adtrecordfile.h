@@ -39,9 +39,9 @@ public:
     bool deleteRecord(string);
     int getCharacter();
     void loadSimpleIndexes();
+    void compact();
 private:
     void readFileStructure();
-    void compact();
     vector<Field*> fields;
     unsigned int record_length;
     streamoff begin_body;

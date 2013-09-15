@@ -334,3 +334,44 @@ bool ADTRecordFile::deleteRecord(string k) {
         return true;
     }
 }
+
+void ADTRecordFile::compact() {
+    if (!fs.is_open() || (this->flags & ios::out) == 0 || (this->flags & ios::in) == 0) {
+        return;
+    }
+    this->readFileStructure();
+    fs.seekg(0, ios_base::end);
+    streamoff end_of_file = fs.tellg();
+    fstream tmp_f("tmp", ios::out | ios::trunc);
+
+    fs.seekg(0, ios_base::beg);
+    while (fs.get() != HEADER_END);
+    int header_size = (int)fs.tellg();
+    char* header = new char[header_size];
+
+    fs.seekg(0, ios_base::beg);
+    fs.read(header, header_size);
+    tmp_f.write(header, header_size);
+
+    while (fs.tellg() != end_of_file) {
+        char* buffer = new char[this->record_length];
+        fs.read(buffer, this->record_length);
+
+        if (buffer[0] != DELETED) {
+            tmp_f.write(buffer, this->record_length);
+        }
+    }
+
+    tmp_f.close();
+    fs.close();
+    fs.open(this->file_name.c_str(), this->flags | ios::trunc);
+    tmp_f.open("tmp", ios::in);
+
+    while (!tmp_f.eof()) {
+        char cpy[1024];
+        int cpy_size = tmp_f.read(cpy, 1024).gcount();
+        fs.write(cpy, cpy_size);
+    }
+    tmp_f.close();
+    this->avail_list.clear();
+}

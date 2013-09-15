@@ -62,6 +62,7 @@ class MainWindow : public QMainWindow
     QAction* search_record;
     QAction* delete_record;
     QAction* list_records;
+    QAction* compact_file;
     QAction* cross_tables;
 
     /* Indexes menu actions */
@@ -133,6 +134,7 @@ public slots:
     void searchRecord();
     void deleteRecord();
     void listRecords();
+    void compactFile();
 
     /* Indexes menu slots */
     void createSimpleIndex();

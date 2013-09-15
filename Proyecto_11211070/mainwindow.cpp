@@ -37,6 +37,7 @@ void MainWindow::init_components() {
     record_menu->addAction(this->search_record);
     record_menu->addAction(this->delete_record);
     record_menu->addAction(this->list_records);
+    record_menu->addAction(this->compact_file);
     record_menu->addAction(this->cross_tables);
 
     /* Indexes menu */
@@ -156,6 +157,12 @@ void MainWindow::init_actions() {
     this->list_records->setToolTip("Search all records");
     this->list_records->setCheckable(false);
     connect(this->list_records, SIGNAL(triggered()), this, SLOT(listRecords()));
+
+    this->compact_file = new QAction("Compact", this);
+    this->compact_file->setStatusTip("Remove deleted elements in current file");
+    this->compact_file->setToolTip("Remove deleted elements in current file");
+    this->compact_file->setCheckable(false);
+    connect(this->compact_file, SIGNAL(triggered()), this, SLOT(compactFile()));
 
     this->cross_tables = new QAction("Cross", this);
     this->cross_tables->setStatusTip("Cross tables");
@@ -305,6 +312,7 @@ void MainWindow::initialStatus() {
     this->search_record->setEnabled(false);
     this->delete_record->setEnabled(false);
     this->list_records->setEnabled(false);
+    this->compact_file->setEnabled(false);
     this->cross_tables->setEnabled(false);
     this->create_simple_index->setEnabled(false);
     this->create_Btree_index->setEnabled(false);
@@ -322,6 +330,7 @@ void MainWindow::enabledComponents() {
     this->create_field->setEnabled(true);
     this->change_field->setEnabled(true);
     this->list_fields->setEnabled(true);
+    this->compact_file->setEnabled(true);
     this->insert_record->setEnabled(true);
     this->search_record->setEnabled(true);
     this->delete_record->setEnabled(true);
@@ -725,6 +734,10 @@ void MainWindow::listRecords() {
             this->main_table->setItem(i, j, new QTableWidgetItem(QString::fromStdString(re.at(j))));
         }
     }
+}
+
+void MainWindow::compactFile() {
+    this->current_open_file.compact();
 }
 
 void MainWindow::createSimpleIndex() {
