@@ -22,6 +22,8 @@
 #include <QTableWidget>
 #include <QTextDocument>
 #include <QPrinter>
+#include <QFile>
+#include <QXmlStreamWriter>
 
 #include "adtfile.h"
 #include "field.h"
@@ -140,6 +142,10 @@ public slots:
 
     /* Indexes menu slots */
     void createSimpleIndex();
+
+    /* Utilities menu slots */
+    void exportJson();
+    void exportXml();
 
     /* Create Field Dialog */
     void desactivateDecimalPlaces();

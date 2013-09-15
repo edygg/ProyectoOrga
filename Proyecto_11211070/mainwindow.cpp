@@ -191,6 +191,7 @@ void MainWindow::init_actions() {
     this->export_xml->setStatusTip("Export current database intro XML file");
     this->export_xml->setToolTip("Export current database intro XML file");
     this->export_xml->setCheckable(false);
+    connect(this->export_xml, SIGNAL(triggered()), this, SLOT(exportXml()));
 
     this->import_xml = new QAction("Import to XML", this);
     this->import_xml->setStatusTip("Import data intro XML file");
@@ -795,4 +796,64 @@ void MainWindow::recieveInput() {
         this->str_input_data = this->le_input_data->text();
         this->input_record_dialog->close();
     }
+}
+
+void MainWindow::exportXml() {
+    QString file_path = QFileDialog::getExistingDirectory(this, "Export to XML file", "");
+
+    if (!file_path.isEmpty()) {
+        file_path += "/outputXML.xml";
+
+        QFile file(file_path);
+
+        if (!file.open(QIODevice::WriteOnly)) {
+            QMessageBox::warning(this, "Error", "Can not export file");
+        } else {
+            QXmlStreamWriter xml_writer;
+            xml_writer.setDevice(&file);
+            xml_writer.writeStartDocument();
+
+            xml_writer.writeStartElement("database");
+            vector<PrimaryIndex*> indexes = this->current_open_file.getAllIndexes();
+
+            for (int i = 0; i < indexes.size(); i++) {
+                PrimaryIndex* curr_i = indexes[i];
+                Record* curr_r = this->current_open_file.readRecord(curr_i);
+                vector<Field*> fields = curr_r->getFields();
+                vector<string> record = curr_r->getRecord();
+
+                xml_writer.writeStartElement("record");
+
+                for (int j = 0; j < fields.size(); j++) {
+                    Field* curr_f = fields[j];
+
+                    xml_writer.writeStartElement(QString::fromStdString(curr_f->getName()));
+
+                    if (curr_f->getDatatype() == INT_DT) {
+                        xml_writer.writeAttribute(QString::fromStdString(string("type")), QString::fromStdString(string("INT")));
+                        xml_writer.writeAttribute(QString::fromStdString(string("length")), QString::number(curr_f->getLength()));
+                    } else if (curr_f->getDatatype() == STRING_DT) {
+                        xml_writer.writeAttribute(QString::fromStdString(string("type")), QString::fromStdString(string("STRING")));
+                        xml_writer.writeAttribute(QString::fromStdString(string("length")), QString::number(curr_f->getLength()));
+                    } else {
+                        xml_writer.writeAttribute(QString::fromStdString(string("type")), QString::fromStdString(string("REAL")));
+                        xml_writer.writeAttribute(QString::fromStdString(string("length")), QString::number(curr_f->getLength()));
+                        xml_writer.writeAttribute(QString::fromStdString(string("dplaces")), QString::number(curr_f->getDecimalPlaces()));
+                    }
+
+                    xml_writer.writeCharacters(QString::fromStdString(record[j]));
+                    xml_writer.writeEndElement();
+                }
+                xml_writer.writeEndElement();
+
+            }
+            xml_writer.writeEndElement();
+            xml_writer.writeEndDocument();
+
+        }
+    }
+}
+
+void MainWindow::exportJson() {
+
 }
