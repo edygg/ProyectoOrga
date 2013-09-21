@@ -28,6 +28,10 @@
 #include <QJsonDocument>
 #include <QJsonValue>
 #include <QJsonObject>
+#include <QDomDocument>
+#include <QDomElement>
+#include <QDomNode>
+#include <QDomAttr>
 
 
 #include "adtfile.h"

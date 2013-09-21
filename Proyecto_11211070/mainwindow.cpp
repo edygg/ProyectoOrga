@@ -321,9 +321,9 @@ void MainWindow::initialStatus() {
     this->create_Btree_index->setEnabled(false);
     this->reindex->setEnabled(false);
     this->export_xml->setEnabled(false);
-    this->import_xml->setEnabled(false);
+    //this->import_xml->setEnabled(false);
     this->export_json->setEnabled(false);
-    this->import_json->setEnabled(false);
+    //this->import_json->setEnabled(false);
 }
 
 void MainWindow::enabledComponents() {
@@ -343,9 +343,9 @@ void MainWindow::enabledComponents() {
     this->create_Btree_index->setEnabled(true);
     this->reindex->setEnabled(true);
     this->export_xml->setEnabled(true);
-    this->import_xml->setEnabled(true);
+    //this->import_xml->setEnabled(true);
     this->export_json->setEnabled(true);
-    this->import_json->setEnabled(true);
+    //this->import_json->setEnabled(true);
 }
 
 void MainWindow::newFile() {
@@ -906,6 +906,84 @@ void MainWindow::importXml() {
     QString file_name = QFileDialog::getOpenFileName(this, "Import XML file", "", "XML (*.xml)");
 
     if (!file_name.isEmpty()) {
+        this->newFile();
+        QDomDocument doc;
+        QFile input_file(file_name);
+        if (!input_file.open(QIODevice::ReadOnly)) {
+            QMessageBox::warning(this, "Error", "Can not import this file");
+            return;
+        }
 
+        if (!doc.setContent(&input_file)) {
+             QMessageBox::warning(this, "Error", "Can not import this file");
+            return;
+        }
+
+        QDomElement db = doc.documentElement();
+
+        QDomNode fr = db.firstChild().firstChild();
+
+        QDomElement e = fr.toElement();
+        vector<Field*> fields;
+
+        while (!e.isNull()) {
+            QString name = e.tagName();
+
+            if (!e.hasAttributes()) {
+                QMessageBox::warning(this, "Error", "Incorrect data structure");
+                return;
+            }
+
+            QDomNamedNodeMap map = e.attributes();
+            datatype dt;
+            int length;
+            int dp = 0;
+            bool k = false;
+
+            if (map.size() < 3) {
+                QMessageBox::warning(this, "Error", "Incorrect data structure");
+                return;
+            }
+
+            for (int i = 0; i < map.size(); i++) {
+                if (!map.item(i).isNull()) {
+                    QDomNode tmpn = map.item(i);
+                    QDomAttr attr = tmpn.toAttr();
+
+                    if (attr.name() == "key") {
+                        if (attr.value() == "true") {
+                            k = true;
+                        }
+                    } else if (attr.name() == "type") {
+                        if (attr.value() == "INT") {
+                            dt = INT_DT;
+                        } else if (attr.value() == "REAL") {
+                            dt = REAL_DT;
+                        } else {
+                            dt = STRING_DT;
+                        }
+                    } else if (attr.name() == "length") {
+                        length = attr.value().toInt();
+                    } else if (attr.name() == "dplaces") {
+                        dp = attr.value().toInt();
+                    } else {
+                        QMessageBox::warning(this, "Error", "Incorrect data structure");
+                        return;
+                    }
+                } else {
+                    QMessageBox::warning(this, "Error", "Incorrect data structure");
+                    return;
+                }
+            }
+
+
+            Field* neo = new Field(name.toStdString(), dt, length, dp, k);
+            fields.push_back(neo);
+            this->current_open_file.createField(neo);
+
+            e = e.nextSibling().toElement();
+        }
+
+        //input_file.close();
     }
 }
