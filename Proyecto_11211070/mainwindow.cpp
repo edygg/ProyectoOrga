@@ -924,7 +924,6 @@ void MainWindow::importXml() {
         QDomNode fr = db.firstChild().firstChild();
 
         QDomElement e = fr.toElement();
-        vector<Field*> fields;
 
         while (!e.isNull()) {
             QString name = e.tagName();
@@ -976,14 +975,11 @@ void MainWindow::importXml() {
                 }
             }
 
-
             Field* neo = new Field(name.toStdString(), dt, length, dp, k);
-            fields.push_back(neo);
             this->current_open_file.createField(neo);
-
             e = e.nextSibling().toElement();
         }
-
-        //input_file.close();
+        cout << endl;
+        input_file.close();
     }
 }

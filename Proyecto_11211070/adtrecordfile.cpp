@@ -139,9 +139,9 @@ bool ADTRecordFile::createField(Field* field) {
         return false;
     }
 
-    if (this->seekg(0, ios_base::beg)) {
+    if (!this->fs.seekp(0, ios_base::beg).fail()) {
         char c;
-        c = this->getCharacter();
+        c = fs.get();
 
         if (c == '%') {
             ostringstream ss;
@@ -156,14 +156,10 @@ bool ADTRecordFile::createField(Field* field) {
             fs.flush();
         } else {
             fs.seekg(0, ios_base::beg);
-            char c1;
 
-            while (c1 != HEADER_END) {
-                c1 = fs.get();
-            }
+            while (fs.get() != HEADER_END);
 
             int buffer_size = (int) fs.tellg() - 1;
-
             char* buffer = new char[buffer_size];
             fs.seekg(0, ios_base::beg);
             fs.read(buffer, buffer_size);
@@ -192,6 +188,7 @@ bool ADTRecordFile::createField(Field* field) {
                 fs.write(cpybuff, cpybuff_size);
             }
         }
+        this->fs.flush();
         return true;
     } else {
         return false;
