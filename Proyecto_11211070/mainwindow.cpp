@@ -886,10 +886,24 @@ void MainWindow::exportJson() {
                 QJsonObject curr_o;
                 curr_o.insert(QString::fromStdString(string("name")), QJsonValue(QString::fromStdString(curr_f->getName())));
 
-                if (curr_);
-                curr_o.insert(QString::fromStdString(string("datatype")));
-            }
+                if (curr_f->getDatatype() == INT_DT) {
+                    curr_o.insert(QString::fromStdString(string("datatype")), QJsonValue(QString::fromStdString(string("INT"))));
+                } else if (curr_f->getDatatype() == REAL_DT) {
+                    curr_o.insert(QString::fromStdString(string("datatype")), QJsonValue(QString::fromStdString(string("REAL"))));
+                } else {
+                    curr_o.insert(QString::fromStdString(string("datatype")), QJsonValue(QString::fromStdString(string("STRING"))));
+                }
 
+                curr_o.insert(QString::fromStdString(string("length")), QJsonValue(QString::number(curr_f->getLength())));
+
+                if (curr_f->getDatatype() == REAL_DT) {
+                    curr_o.insert(QString::fromStdString(string("dplaces")), QJsonValue(QString::number(curr_f->getDecimalPlaces())));
+                } else {
+                    curr_o.insert(QString::fromStdString(string("dplaces")), QJsonValue(QString::number(0)));
+                }
+
+                root.insert(QString::fromStdString(string("Field")), QJsonValue(curr_o));
+            }
 
 
             vector<PrimaryIndex*> indexes = this->current_open_file.getAllIndexes();
@@ -905,7 +919,7 @@ void MainWindow::exportJson() {
                     Field* curr_f = fields[j];
                     curr_o.insert(QString::fromStdString(curr_f->getName()), QJsonValue(QString::fromStdString(record[j])));
                 }
-                root.insert(QString::fromStdString(string("Record")) + QString::number(i), QJsonValue(curr_o));
+                root.insert(QString::fromStdString(string("Record")), QJsonValue(curr_o));
             }
 
             doc.setObject(root);
