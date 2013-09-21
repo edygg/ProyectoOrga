@@ -38,6 +38,7 @@
 #include "field.h"
 #include "adtrecordfile.h"
 #include "object.h"
+#include "record.h"
 
 #include <iostream>
 #include <string>
@@ -156,6 +157,7 @@ public slots:
     void exportJson();
     void exportXml();
     void importXml();
+    void importJson();
 
     /* Create Field Dialog */
     void desactivateDecimalPlaces();

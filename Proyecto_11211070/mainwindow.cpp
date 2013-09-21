@@ -209,6 +209,7 @@ void MainWindow::init_actions() {
     this->import_json->setStatusTip("Import data intro JSON file");
     this->import_json->setToolTip("Import data intro JSON file");
     this->import_json->setCheckable(false);
+    connect(this->import_json, SIGNAL(triggered()), this, SLOT(importJson()));
 }
 
 void MainWindow::init_input_record_dialog() {
@@ -604,6 +605,7 @@ void MainWindow::insertRecord() {
     this->current_open_file.loadSimpleIndexes();
     if (fields.size() == 0) {
         QMessageBox::information(this, "Error", "There are no fields");
+        return;
     }
 
     for (int i = 0; i < fields.size(); i++) {
@@ -876,6 +878,20 @@ void MainWindow::exportJson() {
             QJsonDocument doc;
             QJsonObject root;
 
+            vector<Field*> fields1 = this->current_open_file.listFields();
+
+            for (int i = 0; i < fields1.size(); i++) {
+                Field* curr_f = fields1[i];
+
+                QJsonObject curr_o;
+                curr_o.insert(QString::fromStdString(string("name")), QJsonValue(QString::fromStdString(curr_f->getName())));
+
+                if (curr_);
+                curr_o.insert(QString::fromStdString(string("datatype")));
+            }
+
+
+
             vector<PrimaryIndex*> indexes = this->current_open_file.getAllIndexes();
 
             for (int i = 0; i < indexes.size(); i++) {
@@ -979,7 +995,53 @@ void MainWindow::importXml() {
             this->current_open_file.createField(neo);
             e = e.nextSibling().toElement();
         }
-        cout << endl;
+
+        QDomElement start_data = db.firstChild().toElement();
+
+        while (!start_data.isNull()) {
+            vector<string> record;
+
+            QDomElement t = start_data.firstChild().toElement();
+
+            while (!t.isNull()) {
+                record.push_back(t.text().toStdString());
+                t = t.nextSibling().toElement();
+            }
+
+            Record neo(this->current_open_file.listFields(), record);
+            this->current_open_file.addRecord(neo);
+
+            start_data = start_data.nextSibling().toElement();
+        }
+
         input_file.close();
+    }
+}
+
+void MainWindow::importJson() {
+    QString file_name = QFileDialog::getOpenFileName(this, "Import JSON file", "", "JSON (*.json)");
+
+    if (!file_name.isEmpty()) {
+        QFile input_file(file_name);
+
+        if (!input_file.open(QIODevice::ReadOnly)) {
+            QMessageBox::warning(this, "Error", "Can not import this file");
+            return;
+        }
+
+        QTextStream in(&input_file);
+
+        QString content = in.readAll();
+        QJsonDocument doc = QJsonDocument::fromBinaryData(content.toUtf8());
+
+        QJsonObject root = doc.object();
+
+        if (root.isEmpty()) {
+            QMessageBox::warning(this, "Error", "Can not import this file");
+            return;
+        }
+
+        //Areglar esto y la funcion de exportar
+
     }
 }
