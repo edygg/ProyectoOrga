@@ -255,7 +255,7 @@ void MainWindow::init_field_dialog() {
     this->chbox_key = new QCheckBox(this->field_dialog);
     layout->addRow(new QLabel("Key"), this->chbox_key);
 
-    QPushButton* btn_cancel = new QPushButton("Cancel", this->field_dialog);
+    QPushButton* btn_cancel = new QPushButton("Close", this->field_dialog);
     connect(btn_cancel, SIGNAL(clicked()), this->field_dialog, SLOT(close()));
     QPushButton* btn_save_field = new QPushButton("Save", this->field_dialog);
     connect(btn_save_field, SIGNAL(clicked()), this, SLOT(saveField()));
@@ -322,9 +322,7 @@ void MainWindow::initialStatus() {
     this->create_Btree_index->setEnabled(false);
     this->reindex->setEnabled(false);
     this->export_xml->setEnabled(false);
-    //this->import_xml->setEnabled(false);
     this->export_json->setEnabled(false);
-    //this->import_json->setEnabled(false);
 }
 
 void MainWindow::enabledComponents() {
@@ -344,9 +342,7 @@ void MainWindow::enabledComponents() {
     this->create_Btree_index->setEnabled(true);
     this->reindex->setEnabled(true);
     this->export_xml->setEnabled(true);
-    //this->import_xml->setEnabled(true);
     this->export_json->setEnabled(true);
-    //this->import_json->setEnabled(true);
 }
 
 void MainWindow::newFile() {
@@ -401,6 +397,11 @@ void MainWindow::saveFile() {
 }
 
 void MainWindow::printFile() {
+    if (this->current_open_file.listFields().size() == 0 || this->current_open_file.getAllIndexes().size() == 0) {
+        this->lbl_status_bar->setText("There are no fields or records");
+        return;
+    }
+
     QString folder = QFileDialog::getExistingDirectory(this, "Print PDF file", "");
     if (!folder.isEmpty()) {
         folder += "/outputTable.pdf";
@@ -444,6 +445,7 @@ void MainWindow::printFile() {
         printer.setOutputFormat(QPrinter::PdfFormat);
         doc.print(&printer);
         printer.newPage();
+        this->lbl_status_bar->setText("Print successful");
     }
 
 }
@@ -458,6 +460,10 @@ void MainWindow::closeFile() {
 }
 
 void MainWindow::createField() {
+    if (this->current_open_file.getAllIndexes().size() > 0) {
+        this->lbl_status_bar->setText("Can not add more fields");
+        return;
+    }
     this->field_dialog->exec();
 }
 
@@ -506,6 +512,11 @@ void MainWindow::saveField() {
 }
 
 void MainWindow::changeField() {
+    if (this->current_open_file.listFields().size() == 0) {
+        this->lbl_status_bar->setText("There are no fields");
+        return;
+    }
+
     this->cbox_fields->clear();
     vector<Field*> all_fields = this->current_open_file.listFields();
 
@@ -538,6 +549,11 @@ void MainWindow::updateFields() {
 }
 
 void MainWindow::listFields() {
+    if (this->current_open_file.listFields().size() == 0) {
+        this->lbl_status_bar->setText("There are no fields");
+        return;
+    }
+
     this->clearMainTable();
 
     vector<Field*> fields = this->current_open_file.listFields();
@@ -803,6 +819,12 @@ void MainWindow::recieveInput() {
 }
 
 void MainWindow::exportXml() {
+
+    if (this->current_open_file.listFields().size() == 0 || this->current_open_file.getAllIndexes().size() == 0) {
+        this->lbl_status_bar->setText("There are no fields or records");
+        return;
+    }
+
     QString file_path = QFileDialog::getExistingDirectory(this, "Export to XML file", "");
 
     if (!file_path.isEmpty()) {
@@ -865,6 +887,11 @@ void MainWindow::exportXml() {
 }
 
 void MainWindow::exportJson() {
+    if (this->current_open_file.listFields().size() == 0 || this->current_open_file.getAllIndexes().size() == 0) {
+        this->lbl_status_bar->setText("There are no fields or records");
+        return;
+    }
+
     QString file_path = QFileDialog::getExistingDirectory(this, "Export JSON file", "");
 
     if (!file_path.isEmpty()) {

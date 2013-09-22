@@ -21,7 +21,7 @@ void ADTRecordFile::readFileStructure() {
     } else {
         fs.seekg(0, ios_base::beg);
         while (fs.get() != HEADER_END);
-        int buffer_size = (int) fs.tellg() - 2;
+        int buffer_size = (int) fs.tellg() - 1;
         this->begin_body = fs.tellg();
         char* buffer = new char[buffer_size + 1];
         fs.seekg(0, ios_base::beg);
@@ -59,6 +59,7 @@ void ADTRecordFile::readFileStructure() {
             }
             count += DECIMAL_PLACES_LEGTH;
             bool k;
+
             if (header[count] == '1') {
                 k = true;
             } else {
@@ -80,6 +81,11 @@ void ADTRecordFile::loadSimpleIndexes() {
     qDeleteAll(this->indexes);
     this->indexes.clear();
     this->readFileStructure();
+
+    if (this->fields.size() == 0) {
+        return;
+    }
+
     fs.seekg(0, ios_base::beg);
     while (fs.get() != HEADER_END);
 
@@ -337,6 +343,10 @@ void ADTRecordFile::compact() {
         return;
     }
     this->readFileStructure();
+    if (this->fields.size() == 0) {
+        return;
+    }
+
     fs.seekg(0, ios_base::end);
     streamoff end_of_file = fs.tellg();
     fstream tmp_f("tmp", ios::out | ios::trunc);
