@@ -1,15 +1,24 @@
 #include "mainwindow.h"
 
+/**
+ * Contructor de la clase MainWindow
+ */
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
     init_components();
 }
 
+/**
+ * Destructor de la clase MainWindow
+ */
 MainWindow::~MainWindow()
 {
 }
 
+/**
+ * Método que incializa todos los componentes gŕaficos de la ventana
+ */
 void MainWindow::init_components() {
     init_actions();
     init_field_dialog();
@@ -70,6 +79,10 @@ void MainWindow::init_components() {
     this->setWindowTitle(PROGRAM_NAME);
 }
 
+/**
+ * Método que se encarga de inicializar las acciones u opciones de todos
+ * los menús de la interfaz gráfica.
+ */
 void MainWindow::init_actions() {
     /* File menu actions */
     this->new_file = new QAction("New File", this);
@@ -212,6 +225,10 @@ void MainWindow::init_actions() {
     connect(this->import_json, SIGNAL(triggered()), this, SLOT(importJson()));
 }
 
+/**
+ * Método que se encarga de inicializar los compopnentes gráficos de la ventana
+ * de ingreso de registros
+ */
 void MainWindow::init_input_record_dialog() {
     this->input_record_dialog = new QDialog(this);
     QVBoxLayout* layout = new QVBoxLayout(this->input_record_dialog);
@@ -224,6 +241,10 @@ void MainWindow::init_input_record_dialog() {
     layout->addWidget(this->btn_accept);
 }
 
+/**
+ * Método que se encarga de inicializar los componentes gráficos de la ventana
+ * de ingreso de campos.
+ */
 void MainWindow::init_field_dialog() {
     this->field_dialog = new QDialog(this);
     QFormLayout* layout = new QFormLayout(this->field_dialog);
@@ -297,6 +318,10 @@ void MainWindow::init_change_field_dialog() {
 
 }
 
+/**
+ * Método que se encarga de desactivar el ingreso de espacios decimales
+ * en los casos donde no se requiera el uso.
+ */
 void MainWindow::desactivateDecimalPlaces() {
     if (this->cbox_datatype->currentText() != "Real") {
         this->sp_decimal_places->setEnabled(false);
@@ -305,6 +330,10 @@ void MainWindow::desactivateDecimalPlaces() {
     }
 }
 
+/**
+ * Método que se encarga de desactivar las opciones de menú innecesarias
+ * para comenzar a utilizar el programa
+ */
 void MainWindow::initialStatus() {
     this->save_file->setEnabled(false);
     this->print_file->setEnabled(false);
@@ -325,6 +354,10 @@ void MainWindow::initialStatus() {
     this->export_json->setEnabled(false);
 }
 
+/**
+ * Método que reactiva las opciones de menú para comenzar a utilizar el
+ * programa.
+ */
 void MainWindow::enabledComponents() {
     this->save_file->setEnabled(true);
     this->print_file->setEnabled(true);
@@ -345,23 +378,34 @@ void MainWindow::enabledComponents() {
     this->export_json->setEnabled(true);
 }
 
+/**
+ * Método que se encarga de crear un nuevo archivo y abrirlo para su uso en el programa
+ */
 void MainWindow::newFile() {
+    //Abre un dialogo para seleccionar la carpeta donde se guardará el archivo
     QString folder = QFileDialog::getExistingDirectory(this, "New File", "");
-    if (!folder.isEmpty()) {
+    if (!folder.isEmpty()) { // si el usuario no canceló el dialogo
         bool ok;
+        //se piede al usuario el nombre del archivo
         QString file_name = QInputDialog::getText(this, "File name", "File Name: ", QLineEdit::Normal,"", &ok);
+        //si no canceló y si colocó un nombre
         if (ok && !file_name.isEmpty()) {
+            //se procede a cerrar cualquier otro archivo abierto
             if (this->current_open_file.isOpen()) {
                 this->current_open_file.close();
             }
 
+            //se concatena el nombre del archivo en la carpeta correspondiente
             QString path = folder + "/" + file_name + EXTENSION;
+            //se abre el archivo
             if (!this->current_open_file.open(path.toStdString())) {
                 this->current_open_file.open(path.toStdString(), ios::out);
+                // se escribe un % para identificar que es un nuevo archivo
                 this->current_open_file.write("%", 1);
                 this->current_open_file.flush();
                 this->current_open_file.close();
                 if(this->current_open_file.open(path.toStdString())) {
+                    // se abrió y creo exitosamente
                     QMessageBox::information(this, "Successful", "Database created successfully");
                     enabledComponents();
                 }
@@ -370,14 +414,20 @@ void MainWindow::newFile() {
     }
 }
 
+/**
+ * Método encargado de abrir archivos de registros ya existentes
+ */
 void MainWindow::openFile() {
+    //Abre el cuadro de diálogo para abrir un archivo existente
     QString file_name = QFileDialog::getOpenFileName(this, "Open File", "", "Databases (*" + EXTENSION + ")");
 
-    if (!file_name.isEmpty()) {
+    if (!file_name.isEmpty()) { //si el usuario no cerró el dialogo
+        // se cierra cualquier otro archivo que estaba abierto
         if (this->current_open_file.isOpen()) {
             this->current_open_file.close();
         }
 
+        // se abre el archivo y se habilitan los componentes de los menús
         if (this->current_open_file.open(file_name.toStdString())) {
             this->lbl_status_bar->setText("Opened sucessfully");
             enabledComponents();
@@ -387,6 +437,10 @@ void MainWindow::openFile() {
     }
 }
 
+/**
+ * Método que se encarga de guardar el archivo a través de una llamada a
+ * flush.
+ */
 void MainWindow::saveFile() {
     if(this->current_open_file.flush()) {
         this->lbl_status_bar->setText("Saved successfully");
@@ -396,20 +450,30 @@ void MainWindow::saveFile() {
 
 }
 
+/**
+ * Método que imprime el archivo actual de registros en un archivo PDF
+ */
 void MainWindow::printFile() {
+    //si no hay campos o registros se evita la impresión
     if (this->current_open_file.listFields().size() == 0 || this->current_open_file.getAllIndexes().size() == 0) {
         this->lbl_status_bar->setText("There are no fields or records");
         return;
     }
 
+    //se abre un dialogo para que el usuario seleccione donde guardar el archivo
     QString folder = QFileDialog::getExistingDirectory(this, "Print PDF file", "");
-    if (!folder.isEmpty()) {
+    if (!folder.isEmpty()) { // si el usuario no precionó cancelar
+        //concatena el nuevo nombre del archivo a la carpeta seleccionada
         folder += "/outputTable.pdf";
+        //crea un string para colocar el código HTML que será reinterpretado
+        //para impimir tablas en el PDF
         QString html_code = "";
 
+        //Crea una tabla
         html_code += "<table border=\"1\">";
         html_code += "<tr>";
 
+        //Añade los campos a la tabla en la primer fila
         vector<Field*> fields = this->current_open_file.listFields();
 
         for (int i = 0; i < fields.size(); i++) {
@@ -422,6 +486,7 @@ void MainWindow::printFile() {
 
         vector<PrimaryIndex*> indexes = this->current_open_file.getAllIndexes();
 
+        //Comienza a añadir los registros a la tabla
         for (int i = 0; i < indexes.size(); i++) {
             PrimaryIndex* curr_i = indexes[i];
             Record* curr_r = this->current_open_file.readRecord(curr_i);
@@ -435,21 +500,29 @@ void MainWindow::printFile() {
             html_code += "</tr>";
         }
 
+        //cierra la tabla terminada
         html_code += "</table>";
 
-
+        //abre un documento de texto
         QTextDocument doc;
+        //asigna el código HTML
         doc.setHtml(html_code);
+        //crea una impresora y la habilita para imprimir en PDF
         QPrinter printer;
         printer.setOutputFileName(folder);
         printer.setOutputFormat(QPrinter::PdfFormat);
         doc.print(&printer);
+        //crea la nueva página terminada
         printer.newPage();
         this->lbl_status_bar->setText("Print successful");
     }
 
 }
 
+/**
+ * Método que cierra un archivo de registros abierto y desactiva los componentes
+ * de los menús.
+ */
 void MainWindow::closeFile() {
     if (this->current_open_file.close()) {
         this->lbl_status_bar->setText("Closed successfully");
@@ -459,6 +532,10 @@ void MainWindow::closeFile() {
     }
 }
 
+/**
+ * Método encargado de levantar la ventana que crea campos. Si ya exiten
+ * registros en el archivo no es posible crear más campos.
+ */
 void MainWindow::createField() {
     if (this->current_open_file.getAllIndexes().size() > 0) {
         this->lbl_status_bar->setText("Can not add more fields");
@@ -467,13 +544,19 @@ void MainWindow::createField() {
     this->field_dialog->exec();
 }
 
+/**
+ * Método que envía la información obtenida de un campo a través de las ventanas
+ * al archivo de registros
+ */
 void MainWindow::saveField() {
+    //verifica que se le haya asignado un nombre al campo y que si aplica los espacios decimales sean menores que el tamaño del campo
     if (this->le_name->text().isEmpty() || (this->sp_decimal_places->isEnabled() && this->sp_decimal_places->value() >= this->sp_length->value())) {
         QMessageBox::warning(this->field_dialog, "Error", "Check field values");
-    } else {
-        Field* neo;
+    } else {// si no es así
 
-        if (this->cbox_datatype->currentText() == "Integer") {
+        Field* neo;
+        //crea el campo a partir de la información suministrada en la ventana
+        if (this->cbox_datatype->currentText() == "Integer") { //tipo entero
             neo = new Field(
                         this->le_name->text().toStdString(),
                         INT_DT,
@@ -483,7 +566,7 @@ void MainWindow::saveField() {
                         );
             this->current_open_file.createField(neo);
             this->lbl_status_bar->setText("Success");
-        } else if (this->cbox_datatype->currentText() == "String") {
+        } else if (this->cbox_datatype->currentText() == "String") { //tipo string
             neo = new Field(
                         this->le_name->text().toStdString(),
                         STRING_DT,
@@ -493,7 +576,7 @@ void MainWindow::saveField() {
                         );
             this->current_open_file.createField(neo);
             this->lbl_status_bar->setText("Success");
-        } else {
+        } else {//tipo real
             neo = new Field(
                         this->le_name->text().toStdString(),
                         REAL_DT,
@@ -505,21 +588,29 @@ void MainWindow::saveField() {
             this->lbl_status_bar->setText("Success");
         }
 
+        //Limpia el estado de la ventana
         this->le_name->setText("");
         this->sp_length->setValue(1);
         this->sp_decimal_places->setValue(0);
     }
 }
 
+/**
+ * Método que lanza una ventana que permite actualizar solamente el nombre
+ * de los campos ya ingresados dentro del archivo del registros
+ */
 void MainWindow::changeField() {
+    // si no hay registros no se despliega la ventana
     if (this->current_open_file.listFields().size() == 0) {
         this->lbl_status_bar->setText("There are no fields");
         return;
     }
 
+    //se elimina la información anterior y se recupera la nueva
     this->cbox_fields->clear();
     vector<Field*> all_fields = this->current_open_file.listFields();
 
+    //se agregan los elementos al combobox de la ventan
     if (all_fields.size() != 0) {
         for (int i = 0; i < all_fields.size(); i++) {
             Field* current_field = all_fields[i];
@@ -532,37 +623,52 @@ void MainWindow::changeField() {
     }
 }
 
+/**
+ * Método que actualiza el nombre de los campos a partir de la información obtenida
+ * de la respectiva ventana ingresada por el usuario.
+ */
 void MainWindow::updateFields() {
+    //Obtiene el antiguo nombre del campo
     QString selected_field = this->cbox_fields->currentText();
     vector<Field*> f = this->current_open_file.listFields();
     for (int i = 0; i < f.size(); i++) {
+        //verifica cual es el campo del antiguo nombre y lo sustituye por el nuevo
         Field* curr = f[i];
         if (QString::fromStdString(curr->getName()) == selected_field) {
             curr->setName(this->le_new_field_name->text().toStdString());
             break;
         }
     }
+    //limpia la ventana de actualización de campos
     this->le_new_field_name->setText("");
     this->current_open_file.rewriteFields();
     this->lbl_status_bar->setText("Success");
     this->change_field_dialog->close();
 }
 
+/**
+ * Método que se encarga de listar los campos que posee el archvo de
+ * registros
+ */
 void MainWindow::listFields() {
+    //si no hay registros que listar sale del método
     if (this->current_open_file.listFields().size() == 0) {
         this->lbl_status_bar->setText("There are no fields");
         return;
     }
 
+    //limpia el anterior contenido de la tabla principal
     this->clearMainTable();
 
+    //obtiene los campos
     vector<Field*> fields = this->current_open_file.listFields();
     this->main_table->setColumnCount(5);
+    //añade los títulos
     QStringList headers;
     headers << "Name" << "Data Type" << "Length" << "Decimal Places" << "Key";
     this->main_table->setHorizontalHeaderLabels(headers);
     this->main_table->setRowCount(fields.size());
-
+    //agrega los campos a la tabla con toda su información pertienente
     for (int i = 0; i < fields.size(); i++) {
         stringstream ss;
         string value;
@@ -601,6 +707,10 @@ void MainWindow::listFields() {
     }
 }
 
+/**
+ * Método que se encarga de eliminar la información que tenía la tabla
+ * principal anteriormente en el programa
+ */
 void MainWindow::clearMainTable() {
     if (!this->main_table) {
         return;
@@ -615,24 +725,36 @@ void MainWindow::clearMainTable() {
     }
 }
 
+/**
+ * Método que se encarga de recolectar la información de un registro y añadirla al archivo de registros
+ */
 void MainWindow::insertRecord() {
+    //obtiene los campos
     vector<Field*> fields = this->current_open_file.listFields();
+    //vector donde será almacenada la información del registro
     vector<string> record;
+
+    //carga los índices
     this->current_open_file.loadSimpleIndexes();
+    //si no hay campos entonces se sale del método
     if (fields.size() == 0) {
         QMessageBox::information(this, "Error", "There are no fields");
         return;
     }
 
+    //para cada campo se pide el valor correspondiente para completar el registro
     for (int i = 0; i < fields.size(); i++) {
         Field* curr_f = fields[i];
 
+        //Se actualizan los componentes con la información que van a solicitar al usuario
         this->lbl_message->setText(QString::fromStdString(curr_f->getName()));
         this->le_input_data->setMaxLength(curr_f->getLength());
         this->le_input_data->setText("");
         this->str_input_data = "";
         stringstream regular_pattern;
 
+        //Dependiento el tipo de datos a solicitar de intercambian expresiones
+        //regulares para validar que la información que se ingrese sea consistente
         if (curr_f->getDatatype() == INT_DT) {
             regular_pattern << "[0-9]*";
         } else if (curr_f->getDatatype() == REAL_DT) {
@@ -646,14 +768,18 @@ void MainWindow::insertRecord() {
         QRegExp exp(QString::fromStdString(regular_pattern.str()));
         this->le_input_data->setValidator(new QRegExpValidator(exp, this->input_record_dialog));
 
+        //se ejecuta la ventana
         this->input_record_dialog->exec();
 
+        //si el usuario no agregó nada o dio al botón cancelar se sale del método
         if (this->str_input_data.isEmpty()) {
             return;
         }
 
+        //si no se concatena la información adquirida
         record.push_back(this->str_input_data.toStdString());
     }
+    //se crea el registro y se agrega al archivo
     Record r(fields, record);
     if (this->current_open_file.addRecord(r)) {
         this->lbl_status_bar->setText("Record added");
@@ -662,20 +788,28 @@ void MainWindow::insertRecord() {
     }
 }
 
+/**
+ * Método que busca en un registro y lo despliega en la tabla principal si
+ * es encontrado.
+ */
 void MainWindow::searchRecord() {
     vector<Field*> fields = this->current_open_file.listFields();
     stringstream k;
 
+    //revisa campo por campo para verificar los campos llave y buscar el registro
+    //a partir de la llave
     for (int i = 0; i < fields.size(); i++) {
         Field* curr_f = fields[i];
 
         if (curr_f->isKey()) {
+            //prepara la ventana para el siguiente campo a ingresar
             this->lbl_message->setText(QString::fromStdString(curr_f->getName()));
             this->le_input_data->setMaxLength(curr_f->getLength());
             this->le_input_data->setText("");
             this->str_input_data = "";
             stringstream regular_pattern;
 
+            //valida el tipo de datos que entra
             if (curr_f->getDatatype() == INT_DT) {
                 regular_pattern << "[0-9]*";
             } else if (curr_f->getDatatype() == REAL_DT) {
@@ -689,23 +823,30 @@ void MainWindow::searchRecord() {
             QRegExp exp(QString::fromStdString(regular_pattern.str()));
             this->le_input_data->setValidator(new QRegExpValidator(exp, this->input_record_dialog));
 
+            //lanza la ventana
             this->input_record_dialog->exec();
 
+            //si el usuario dio cancelar se anula el proceso
             if (this->str_input_data.isEmpty()) {
                 return;
             }
 
+            // se va concatenando a la clave
             k << this->str_input_data.toStdString();
         }
     }
 
+    //se busca en el archivo
     PrimaryIndex* result_index = this->current_open_file.searchRecord(k.str());
 
-    if (result_index == NULL) {
+    //se verifica el resultado
+    if (result_index == NULL) { // si no se encontró
         QMessageBox::information(this, "Not Found", "The record doesn't exist");
-    } else {
+    } else { // si se ha encontrado lo despliega en la tabala principal
+        // se obtiene el registro
         Record* result_record = this->current_open_file.readRecord(result_index);
 
+        // se prepara la tabla
         this->clearMainTable();
         vector<Field*> fields = result_record->getFields();
         this->main_table->setColumnCount(fields.size());
@@ -721,6 +862,7 @@ void MainWindow::searchRecord() {
 
         vector<string> re = result_record->getRecord();
 
+        //se ingresan los elementos
         for (int j = 0; j < re.size(); j++) {
             this->main_table->setItem(0, j, new QTableWidgetItem(QString::fromStdString(re.at(j))));
         }
@@ -729,10 +871,15 @@ void MainWindow::searchRecord() {
 
 }
 
+/**
+ * Método encargado de eliminar un registro a partir de la clave suministrada
+ * por el usuario.
+ */
 void MainWindow::deleteRecord() {
     vector<Field*> fields = this->current_open_file.listFields();
     stringstream k;
 
+    //se leen todos los campos llave para formar la clave a eliminar
     for (int i = 0; i < fields.size(); i++){
         Field* curr_f = fields[i];
 
@@ -743,6 +890,7 @@ void MainWindow::deleteRecord() {
             this->str_input_data = "";
             stringstream regular_pattern;
 
+            // se valida los datos que se van a recibir
             if (curr_f->getDatatype() == INT_DT) {
                 regular_pattern << "[0-9]*";
             } else if (curr_f->getDatatype() == REAL_DT) {
@@ -758,14 +906,17 @@ void MainWindow::deleteRecord() {
 
             this->input_record_dialog->exec();
 
+            //si el usuario presionó cancelar se aborta el proceso
             if (this->str_input_data.isEmpty()) {
                 return;
             }
 
+            //se concatena a la clave
             k << this->str_input_data.toStdString();
         }
     }
 
+    //se elimina la clave si esta se encuentra en el archivo
     if (this->current_open_file.deleteRecord(k.str())) {
         this->lbl_status_bar->setText("Deleted success");
     } else {
@@ -773,14 +924,19 @@ void MainWindow::deleteRecord() {
     }
 }
 
+/**
+ * Método que lista los registros en la tabla principal del programa
+ */
 void MainWindow::listRecords() {
     vector<PrimaryIndex*> indexes = this->current_open_file.getAllIndexes();
 
+    //prepara la tabla para ingresar los registros
     this->clearMainTable();
     vector<Field*> fields = this->current_open_file.listFields();
     this->main_table->setColumnCount(fields.size());
     QStringList headers;
 
+    //con los nombres de los campos se preparan los encabezados
     for (int i = 0; i < fields.size(); i++) {
         Field* curr_f = fields[i];
         headers << QString::fromStdString(curr_f->getName());
@@ -789,6 +945,7 @@ void MainWindow::listRecords() {
     this->main_table->setHorizontalHeaderLabels(headers);
     this->main_table->setRowCount(indexes.size());
 
+    //se agregan las filas a la tabla a partir de los registros en el archivo
     for (int i = 0; i < indexes.size(); i++) {
         PrimaryIndex* curr_i = indexes[i];
 
@@ -801,14 +958,24 @@ void MainWindow::listRecords() {
     }
 }
 
+/**
+ * Método que llama a compactar archivo de registros
+ */
 void MainWindow::compactFile() {
     this->current_open_file.compact();
 }
 
+/**
+ * Método que llama a la creación de índices simples en un archivo de registros
+ */
 void MainWindow::createSimpleIndex() {
     this->current_open_file.loadSimpleIndexes();
 }
 
+/**
+ * Método que valida que los datos recibidos por el usuario sean consistentes
+ * y no vacios.
+ */
 void MainWindow::recieveInput() {
     if (this->le_input_data->text().isEmpty()) {
         QMessageBox::information(this->input_record_dialog, "Error", "Empty Input Data");
@@ -818,30 +985,45 @@ void MainWindow::recieveInput() {
     }
 }
 
+/**
+ * Método que exporta el actual archivo de regisros al formato XML
+ */
 void MainWindow::exportXml() {
-
+    //si no hay campos o no hay registros entonces no se crea el archivo
     if (this->current_open_file.listFields().size() == 0 || this->current_open_file.getAllIndexes().size() == 0) {
         this->lbl_status_bar->setText("There are no fields or records");
         return;
     }
 
+    //se despliega un dialogo para seleccionar la carpeta en donde se desea guardar
+    //el archivo XML
     QString file_path = QFileDialog::getExistingDirectory(this, "Export to XML file", "");
 
+    //si el usuario no presionó cancelar
     if (!file_path.isEmpty()) {
+        //se concatena el nombre del archivo XML a la carpeta seleccionada
         file_path += "/outputXML.xml";
 
+        //se crea un archivo lógico
         QFile file(file_path);
 
+        // se abre el archivo en modo escritura
         if (!file.open(QIODevice::WriteOnly)) {
             QMessageBox::warning(this, "Error", "Can not export file");
         } else {
+            //Se crea un stream para escribir el archivo XML
             QXmlStreamWriter xml_writer;
+            //se enlaza el stream con el archivo
             xml_writer.setDevice(&file);
+            // se inicia el documento
             xml_writer.writeStartDocument();
 
+            //Se agrega el elemento raíz
             xml_writer.writeStartElement("database");
             vector<PrimaryIndex*> indexes = this->current_open_file.getAllIndexes();
 
+            // se añaden todos los registros con su información correspondiente
+            // del campo donde están almacenados
             for (int i = 0; i < indexes.size(); i++) {
                 PrimaryIndex* curr_i = indexes[i];
                 Record* curr_r = this->current_open_file.readRecord(curr_i);
@@ -879,6 +1061,7 @@ void MainWindow::exportXml() {
                 xml_writer.writeEndElement();
 
             }
+            //se cierra el tag principal y el documento
             xml_writer.writeEndElement();
             xml_writer.writeEndDocument();
 
@@ -886,27 +1069,36 @@ void MainWindow::exportXml() {
     }
 }
 
+/**
+ * Método que se encarga de exportar el actual archivo de registros en un archivo JSON
+ */
 void MainWindow::exportJson() {
+    //verifica si existen campos y registros
     if (this->current_open_file.listFields().size() == 0 || this->current_open_file.getAllIndexes().size() == 0) {
         this->lbl_status_bar->setText("There are no fields or records");
         return;
     }
 
+    //levanta un dialogo para seleccionar la carpeta donde se va a guardar el archivo JSON
     QString file_path = QFileDialog::getExistingDirectory(this, "Export JSON file", "");
 
     if (!file_path.isEmpty()) {
+        //se concatena el nuevo nombre del archivo a la carpeta seleccionada
         file_path += "/outputJSON.json";
 
+        //se crea un archivo lógico
         QFile file(file_path);
-
+        //se abre para escritura y en modo texto
         if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
             QMessageBox::warning(this, "Error", "Can not export the file");
         } else {
+            //se crea un documento JSON
             QJsonDocument doc;
             QJsonObject root;
 
             vector<Field*> fields1 = this->current_open_file.listFields();
 
+            //se agregan todos los campos como objetos JSON dentro del objeto raíz
             for (int i = 0; i < fields1.size(); i++) {
                 Field* curr_f = fields1[i];
 
@@ -937,6 +1129,7 @@ void MainWindow::exportJson() {
 
             vector<PrimaryIndex*> indexes = this->current_open_file.getAllIndexes();
 
+            //se agregan los registros como objetos JSON a la raíz
             for (int i = 0; i < indexes.size(); i++) {
                 QJsonObject curr_o;
                 PrimaryIndex* curr_i = indexes[i];
@@ -952,32 +1145,45 @@ void MainWindow::exportJson() {
             }
 
             doc.setObject(root);
+            // se transfiere el contenido del documento JSON a un Qstring
             QString result(doc.toJson());
 
+            //se crea un stream que enlaza el archivo lógico con el stream de texto
             QTextStream out(&file);
 
+            //se envia al archivo
             out << result;
         }
     }
 }
 
+/**
+ * Método que lee un archivo XML y lo transfiere a un nuevo archivo de registros
+ */
 void MainWindow::importXml() {
+    //levanta un dialogo para abrir el archivo XML
     QString file_name = QFileDialog::getOpenFileName(this, "Import XML file", "", "XML (*.xml)");
 
+    //si el usuario no presionó cancelar
     if (!file_name.isEmpty()) {
+        //crea un nuevo archivo
         this->newFile();
+        //crea un documento XML
         QDomDocument doc;
         QFile input_file(file_name);
+        //abre el archivo para lectura
         if (!input_file.open(QIODevice::ReadOnly)) {
             QMessageBox::warning(this, "Error", "Can not import this file");
             return;
         }
 
+        //agrega el archivo al documento XML
         if (!doc.setContent(&input_file)) {
              QMessageBox::warning(this, "Error", "Can not import this file");
             return;
         }
 
+        //lee la estructura de los nodos para agregar los campos
         QDomElement db = doc.documentElement();
 
         QDomNode fr = db.firstChild().firstChild();
@@ -991,7 +1197,7 @@ void MainWindow::importXml() {
                 QMessageBox::warning(this, "Error", "Incorrect data structure");
                 return;
             }
-
+            //los atributos de los tags de XML son las características de los campos en el archivo de registros
             QDomNamedNodeMap map = e.attributes();
             datatype dt;
             int length;
@@ -1034,11 +1240,13 @@ void MainWindow::importXml() {
                 }
             }
 
+            //agrega el campo
             Field* neo = new Field(name.toStdString(), dt, length, dp, k);
             this->current_open_file.createField(neo);
             e = e.nextSibling().toElement();
         }
 
+        //lee los registros
         QDomElement start_data = db.firstChild().toElement();
 
         while (!start_data.isNull()) {
@@ -1061,24 +1269,34 @@ void MainWindow::importXml() {
     }
 }
 
+/**
+ * Método que importa un archivo JSON a los archivos de registro del programa
+ */
 void MainWindow::importJson() {
+    //levanta un dialogo para seleccionar el archivo JSon a importar
     QString file_name = QFileDialog::getOpenFileName(this, "Import JSON file", "", "JSON (*.json)");
-
+    //si el usuario no presionó cancelar
     if (!file_name.isEmpty()) {
+        //creando el archivo de registros
         QFile input_file(file_name);
 
+        //abriendo para solo lectura
         if (!input_file.open(QIODevice::ReadOnly)) {
             QMessageBox::warning(this, "Error", "Can not import this file");
             return;
         }
 
+        //creando un nuevo archivo de registros
         this->newFile();
 
+        //enlazando el archivo lógico al stream de texto
         QTextStream in(&input_file);
 
+        //leyendo la estructura del archivo JSON
         QString content = in.readAll();
         QJsonDocument doc = QJsonDocument::fromJson(content.toUtf8());
 
+        //extrayendo la raíz
         QJsonObject root = doc.object();
 
         if (root.isEmpty()) {
@@ -1086,8 +1304,10 @@ void MainWindow::importJson() {
             return;
         }
 
+        //sacando los objetos dentro de la raíz
         QStringList objects = root.keys();
 
+        //leyendo y conviertiendo solamente los objetos campo
         for (int i = 0; i < objects.size(); i++) {
             if (objects[i].contains(QString::fromStdString(string("Field")), Qt::CaseInsensitive)) {
                 QJsonObject curr_o = root[objects[i]].toObject();
@@ -1138,6 +1358,7 @@ void MainWindow::importJson() {
 
         vector<Field*> fields = this->current_open_file.listFields();
 
+        //leyendo solo los objetos registro
         for (int i = 0; i < objects.size(); i++) {
             vector<string> record;
             if (objects[i].contains(QString::fromStdString(string("Record")), Qt::CaseInsensitive)) {

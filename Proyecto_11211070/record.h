@@ -9,6 +9,12 @@ using namespace std;
 
 #include "field.h"
 
+/**
+ *                     ********************** Clase Record **********************
+ *  Almacena información de los campos y el registro que será almacenado en arhivos. Posee las estructura
+ *  necesaria para ser transferido a texto a partir de la información suministrada en un vector de campos
+ *  con sus características.
+ */
 class Record
 {
 public:
@@ -17,7 +23,9 @@ public:
     vector<Field*> getFields() const;
     vector<string> getRecord() const;
 private:
+    //CVctor que contiene la información de los campos del registro
     vector<Field*> fields;
+    //Información propia del registro.
     vector<string> record;
 };
 

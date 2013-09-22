@@ -6,6 +6,10 @@
 #include <string>
 using namespace std;
 
+/**
+ *                 ********** Clase ADTFile ***********
+ *  Clase padre que maneja las operaciones elementales con archivos.
+ */
 class ADTFile
 {
 public:
@@ -24,8 +28,11 @@ public:
     virtual bool isOK() const;
     virtual bool isEOF() const;
 protected:
+    //Nombre del archivo
     string file_name;
+    //Instancia de fstream que conecta el archivo físico con el archivo lógico
     fstream fs;
+    //Modos con los que fue abierto el archivo
     ios_base::openmode flags;
 };
 

@@ -21,9 +21,16 @@ using namespace std;
 #include "record.h"
 #include "primaryindex.h"
 
+//Constante para identificar el final del file header
 const char HEADER_END = '&';
+//Constante para identificar a un registro eliminado
 const char DELETED = '?';
 
+/**
+ *             ************* Clase hija ADTRecordFile *************
+ *  Maneja las operaciones elementales con archivos de registros: CRU de campos,
+ *  CRUD de registros y el manejo de índices por medio de mapas.
+ */
 class ADTRecordFile : public ADTFile
 {
 public:
@@ -42,10 +49,15 @@ public:
     void compact();
 private:
     void readFileStructure();
+    //Vector de campos que almacena los campos que contiene el archivo de registros
     vector<Field*> fields;
+    //Tamaño de un registro individual
     unsigned int record_length;
+    //Offset donde comienza el cuerpo del archivo de registros
     streamoff begin_body;
+    //Mapa con los índices simples
     QMap<QString, PrimaryIndex*> indexes;
+    //Avail List para controlar los espacios disponibles dentro de un archivo.
     QStack<streamoff> avail_list;
 };
 

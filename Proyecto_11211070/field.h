@@ -25,6 +25,10 @@ const string INT_DVALUE = "0";
 const string REAL_DVALUE = "0.0";
 const string STRING_DVALUE = "NULL";
 
+/**
+ *           ******************** Clase Field ********************
+ *  Almacena la información necesario para un campo de un archivo de registros.
+ */
 class Field
 {
 public:
@@ -38,10 +42,15 @@ public:
     string toString() const;
     bool operator==(const Field&);
 private:
+    //Nombre del campo
     string name;
+    //Tipo de datos del campo
     datatype data_type;
+    //Tamaño del campo
     int length;
+    //Cantidad de espacios decimales
     int decimal_places;
+    //Es llave o no
     bool key;
 };
 
