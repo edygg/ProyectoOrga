@@ -902,7 +902,9 @@ void MainWindow::exportJson() {
                     curr_o.insert(QString::fromStdString(string("dplaces")), QJsonValue(QString::number(0)));
                 }
 
-                root.insert(QString::fromStdString(string("Field")), QJsonValue(curr_o));
+                curr_o.insert(QString::fromStdString(string("key")), QJsonValue(curr_f->isKey()));
+
+                root.insert(QString::fromStdString(string("Field")) + QString::number(i), QJsonValue(curr_o));
             }
 
 
@@ -919,7 +921,7 @@ void MainWindow::exportJson() {
                     Field* curr_f = fields[j];
                     curr_o.insert(QString::fromStdString(curr_f->getName()), QJsonValue(QString::fromStdString(record[j])));
                 }
-                root.insert(QString::fromStdString(string("Record")), QJsonValue(curr_o));
+                root.insert(QString::fromStdString(string("Record")) + QString::number(i), QJsonValue(curr_o));
             }
 
             doc.setObject(root);
@@ -1043,10 +1045,12 @@ void MainWindow::importJson() {
             return;
         }
 
+        this->newFile();
+
         QTextStream in(&input_file);
 
         QString content = in.readAll();
-        QJsonDocument doc = QJsonDocument::fromBinaryData(content.toUtf8());
+        QJsonDocument doc = QJsonDocument::fromJson(content.toUtf8());
 
         QJsonObject root = doc.object();
 
@@ -1055,7 +1059,73 @@ void MainWindow::importJson() {
             return;
         }
 
-        //Areglar esto y la funcion de exportar
+        QStringList objects = root.keys();
+
+        for (int i = 0; i < objects.size(); i++) {
+            if (objects[i].contains(QString::fromStdString(string("Field")), Qt::CaseInsensitive)) {
+                QJsonObject curr_o = root[objects[i]].toObject();
+                QStringList attr = curr_o.keys();
+
+                string name;
+                datatype dt;
+                int dp;
+                int length;
+                bool k;
+
+                for (int j = 0; j < attr.size(); j++) {
+
+                    if (attr[j] == "name") {
+                        name = curr_o[attr[j]].toString().toStdString();
+                    } else if (attr[j] == "datatype") {
+                        string tmp1 = curr_o[attr[j]].toString().toStdString();
+
+                        if (tmp1 == "INT") {
+                            dt = INT_DT;
+                        } else if (tmp1 == "REAL") {
+                            dt = REAL_DT;
+                        } else {
+                            dt = STRING_DT;
+                        }
+                    } else if (attr[j] == "length") {
+                        length = curr_o[attr[j]].toString().toInt();
+                    } else if (attr[j] == "dplaces") {
+                        dp = curr_o[attr[j]].toString().toInt();
+                    } else if (attr[j] == "key") {
+                       k = curr_o[attr[j]].toBool();
+                    } else {
+                        QMessageBox::warning(this, "Error", "Can not import this file");
+                        return;
+                    }
+                }
+
+                Field* neo = new Field(name, dt, length, dp, k);
+
+                this->current_open_file.createField(neo);
+            } else if (objects[i].contains(QString::fromStdString(string("Record")), Qt::CaseInsensitive)) {
+                continue;
+            } else {
+                QMessageBox::warning(this, "Error", "Can not import this file");
+                return;
+            }
+        }
+
+        vector<Field*> fields = this->current_open_file.listFields();
+
+        for (int i = 0; i < objects.size(); i++) {
+            vector<string> record;
+            if (objects[i].contains(QString::fromStdString(string("Record")), Qt::CaseInsensitive)) {
+                QJsonObject curr_o = root[objects[i]].toObject();
+                QStringList attr = curr_o.keys();
+                for (int j = 0; j < fields.size(); j++) {
+                    Field* curr_f = fields[j];
+                    int pos = attr.indexOf(QString::fromStdString(curr_f->getName()));
+                    record.push_back(curr_o[attr[pos]].toString().toStdString());
+                }
+                Record neo(fields, record);
+                this->current_open_file.addRecord(neo);
+            }
+        }
+
 
     }
 }
