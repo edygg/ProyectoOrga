@@ -758,7 +758,7 @@ void MainWindow::insertRecord() {
         if (curr_f->getDatatype() == INT_DT) {
             regular_pattern << "[0-9]*";
         } else if (curr_f->getDatatype() == REAL_DT) {
-            regular_pattern << "[0-9]*\.[0-9]{1,";
+            regular_pattern << "[0-9]*[.][0-9]{1,";
             regular_pattern << curr_f->getDecimalPlaces();
             regular_pattern << "}";
         } else {
@@ -813,7 +813,7 @@ void MainWindow::searchRecord() {
             if (curr_f->getDatatype() == INT_DT) {
                 regular_pattern << "[0-9]*";
             } else if (curr_f->getDatatype() == REAL_DT) {
-                regular_pattern << "[0-9]*\.[0-9]{1,";
+                regular_pattern << "[0-9]*[.][0-9]{1,";
                 regular_pattern << curr_f->getDecimalPlaces();
                 regular_pattern << "}";
             } else {
@@ -894,7 +894,7 @@ void MainWindow::deleteRecord() {
             if (curr_f->getDatatype() == INT_DT) {
                 regular_pattern << "[0-9]*";
             } else if (curr_f->getDatatype() == REAL_DT) {
-                regular_pattern << "[0-9]*\.[0-9]{1,";
+                regular_pattern << "[0-9]*[.][0-9]{1,";
                 regular_pattern << curr_f->getDecimalPlaces();
                 regular_pattern << "}";
             } else {
