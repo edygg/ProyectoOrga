@@ -206,7 +206,7 @@ void MainWindow::init_actions() {
     this->export_xml->setCheckable(false);
     connect(this->export_xml, SIGNAL(triggered()), this, SLOT(exportXml()));
 
-    this->import_xml = new QAction("Import to XML", this);
+    this->import_xml = new QAction("Import from XML", this);
     this->import_xml->setStatusTip("Import data intro XML file");
     this->import_xml->setToolTip("Import data intro XML file");
     this->import_xml->setCheckable(false);
@@ -218,7 +218,7 @@ void MainWindow::init_actions() {
     this->export_json->setCheckable(false);
     connect(this->export_json, SIGNAL(triggered()), this, SLOT(exportJson()));
 
-    this->import_json = new QAction("Import to JSON", this);
+    this->import_json = new QAction("Import from JSON", this);
     this->import_json->setStatusTip("Import data intro JSON file");
     this->import_json->setToolTip("Import data intro JSON file");
     this->import_json->setCheckable(false);
